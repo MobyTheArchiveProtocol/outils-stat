@@ -323,6 +323,11 @@ export async function getCharacterDetails(
     professionsRes,
     reputationsRes,
     titlesRes,
+    bracket2v2Res,
+    bracket3v3Res,
+    bracketRbgRes,
+    bracketShuffleRes,
+    bracketBlitzRes,
   ] = await Promise.allSettled([
     blizzardGet<CharacterMountsCollection>({ region, namespace: ns, path: `${base}/collections/mounts`, revalidate: 60 }),
     blizzardGet<CharacterPetsCollection>({ region, namespace: ns, path: `${base}/collections/pets`, revalidate: 60 }),
@@ -333,6 +338,11 @@ export async function getCharacterDetails(
     blizzardGet<CharacterProfessions>({ region, namespace: ns, path: `${base}/professions`, revalidate: 60 }),
     blizzardGet<CharacterReputations>({ region, namespace: ns, path: `${base}/reputations`, revalidate: 60 }),
     blizzardGet<CharacterTitles>({ region, namespace: ns, path: `${base}/titles`, revalidate: 60 }),
+    blizzardGet<CharacterPvPBracket>({ region, namespace: ns, path: `${base}/pvp-bracket/2v2`, revalidate: 60 }),
+    blizzardGet<CharacterPvPBracket>({ region, namespace: ns, path: `${base}/pvp-bracket/3v3`, revalidate: 60 }),
+    blizzardGet<CharacterPvPBracket>({ region, namespace: ns, path: `${base}/pvp-bracket/rbg`, revalidate: 60 }),
+    blizzardGet<CharacterPvPBracket>({ region, namespace: ns, path: `${base}/pvp-bracket/shuffle`, revalidate: 60 }),
+    blizzardGet<CharacterPvPBracket>({ region, namespace: ns, path: `${base}/pvp-bracket/blitz`, revalidate: 60 }),
   ]);
 
   let collections: CharacterCollections | null = null;
@@ -375,11 +385,13 @@ export async function getCharacterDetails(
   let pvp: CharacterDetails["pvp"] = null;
   if (pvpSummaryRes.status === "fulfilled") {
     const summary = pvpSummaryRes.value;
-    const bracketResults = await Promise.allSettled(
-      PVP_BRACKETS.map((bracket) =>
-        blizzardGet<CharacterPvPBracket>({ region, namespace: ns, path: `${base}/pvp-bracket/${bracket}`, revalidate: 60 })
-      )
-    );
+    const bracketResults = [
+      bracket2v2Res,
+      bracket3v3Res,
+      bracketRbgRes,
+      bracketShuffleRes,
+      bracketBlitzRes,
+    ];
     const brackets = bracketResults
       .map((res, i) =>
         res.status === "fulfilled" && res.value.rating > 0

@@ -3,6 +3,9 @@ import { isBlizzardConfigured } from "@/lib/blizzard/oauth";
 import { parseRegion, REGIONS } from "@/lib/blizzard/regions";
 import { getCharacterDetails } from "@/lib/blizzard/wow";
 
+export const maxDuration = 60;
+export const dynamic = "force-dynamic";
+
 export async function GET(request: Request) {
   if (!isBlizzardConfigured()) {
     return NextResponse.json(
