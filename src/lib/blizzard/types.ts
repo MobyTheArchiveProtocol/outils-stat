@@ -208,3 +208,201 @@ export type CharacterProgression = {
     }[];
   } | null;
 };
+
+type NamedRef = { name: LocalizedField; id: number; key?: SelfRef };
+
+type TypeNamedRef = { type: string; name: LocalizedField };
+
+type EncounterProgress = {
+  completed_count: number;
+  total_count: number;
+  encounters: {
+    encounter: NamedRef;
+    completed_count: number;
+    last_kill_timestamp: number;
+  }[];
+};
+
+type EncounterMode = {
+  difficulty: TypeNamedRef;
+  status: TypeNamedRef;
+  progress: EncounterProgress;
+};
+
+type EncounterExpansion = {
+  expansion: NamedRef;
+  instances: {
+    instance: NamedRef;
+    modes: EncounterMode[];
+  }[];
+};
+
+export type CharacterEncounters = {
+  expansions: EncounterExpansion[];
+};
+
+export type CharacterRaids = CharacterEncounters;
+
+export type CharacterDungeons = CharacterEncounters;
+
+export type CharacterCollectionsIndex = {
+  mounts: SelfRef;
+  pets: SelfRef;
+  toys?: SelfRef;
+  heirlooms?: SelfRef;
+};
+
+export type CharacterMountsCollection = {
+  mounts: { mount: NamedRef; is_favorite?: boolean }[];
+};
+
+export type CharacterPetsCollection = {
+  pets: {
+    species: NamedRef;
+    level: number;
+    quality: TypeNamedRef;
+    stats: { breed_id: number; health: number; power: number; speed: number };
+    is_favorite?: boolean;
+  }[];
+  unlocked_battle_pet_slots: number;
+};
+
+export type CharacterToysCollection = {
+  toys: { toy: NamedRef }[];
+};
+
+export type CharacterPvPSummary = {
+  honorable_kills: number;
+  honor_level: number;
+  brackets: { href: string }[];
+  pvp_map_statistics: {
+    world_map: { name: LocalizedField; id: number };
+    match_statistics: { played: number; won: number; lost: number };
+  }[];
+};
+
+type MatchStatistics = { played: number; won: number; lost: number };
+
+export type CharacterPvPBracket = {
+  rating: number;
+  season: { id: number };
+  tier: { id: number } | null;
+  season_match_statistics: MatchStatistics;
+  weekly_match_statistics: MatchStatistics;
+  bracket: { id: number; type: string };
+};
+
+type ProfessionTier = {
+  skill_points: number;
+  max_skill_points: number;
+  tier: { name: LocalizedField; id: number };
+  known_recipes: NamedRef[];
+};
+
+export type CharacterProfessions = {
+  primaries: { profession: NamedRef; tiers: ProfessionTier[] }[];
+  secondaries: { profession: NamedRef; tiers: ProfessionTier[] }[];
+};
+
+export type CharacterReputations = {
+  reputations: {
+    faction: NamedRef;
+    standing: {
+      raw: number;
+      value: number;
+      max: number;
+      tier: number;
+      name: LocalizedField;
+      renown_level?: number;
+    };
+    paragon?: { raw: number; value: number; max: number };
+  }[];
+};
+
+export type CharacterTitles = {
+  active_title?: { name: LocalizedField; id: number; display_string: LocalizedField } | null;
+  titles: NamedRef[];
+};
+
+export type CharacterCollections = {
+  mounts: { name: string; id: number; isFavorite: boolean }[] | null;
+  pets: {
+    name: string;
+    id: number;
+    level: number;
+    quality: string;
+    qualityName: string;
+    health: number;
+    power: number;
+    speed: number;
+  }[] | null;
+  toys: { name: string; id: number }[] | null;
+  needsAuth: boolean;
+};
+
+export type CharacterDetails = {
+  collections: CharacterCollections | null;
+  raids: {
+    expansions: {
+      name: string;
+      instances: {
+        name: string;
+        modes: {
+          difficulty: string;
+          difficultyName: string;
+          status: string;
+          statusName: string;
+          completedCount: number;
+          totalCount: number;
+        }[];
+      }[];
+    }[];
+  } | null;
+  dungeons: {
+    expansions: {
+      name: string;
+      instances: {
+        name: string;
+        modes: {
+          difficulty: string;
+          difficultyName: string;
+          status: string;
+          statusName: string;
+          completedCount: number;
+          totalCount: number;
+        }[];
+      }[];
+    }[];
+  } | null;
+  pvp: {
+    honorableKills: number;
+    honorLevel: number;
+    mapStatistics: { mapName: string; played: number; won: number; lost: number }[];
+    brackets: {
+      bracket: string;
+      rating: number;
+      seasonId: number;
+      seasonPlayed: number;
+      seasonWon: number;
+      seasonLost: number;
+      weeklyPlayed: number;
+      weeklyWon: number;
+      weeklyLost: number;
+    }[];
+  } | null;
+  professions: {
+    primaries: { name: string; tiers: { tierName: string; skillPoints: number; maxSkillPoints: number; recipeCount: number }[] }[];
+    secondaries: { name: string; tiers: { tierName: string; skillPoints: number; maxSkillPoints: number; recipeCount: number }[] }[];
+  } | null;
+  reputations: {
+    faction: string;
+    tier: number;
+    standingName: string;
+    value: number;
+    max: number;
+  }[] | null;
+  titles: {
+    active: string | null;
+    list: string[];
+  } | null;
+};

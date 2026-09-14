@@ -1,11 +1,19 @@
 import "server-only";
 
-import { OAUTH_HOSTS, type Region } from "./regions";
+import { OAUTH_HOSTS, REGIONS, type Region } from "./regions";
 
 type TokenResponse = {
   access_token: string;
   token_type: "bearer";
   expires_in: number;
+};
+
+type UserTokenResponse = {
+  access_token: string;
+  token_type: "bearer";
+  expires_in: number;
+  scope?: string;
+  sub?: string;
 };
 
 type CachedToken = {
@@ -86,4 +94,109 @@ export async function getAccessToken(region: Region): Promise<string> {
 
   const token = await promise;
   return token.accessToken;
+}
+
+export const OAUTH_SCOPES = ["wow.profile"];
+
+export function userRedirectUri(): string | null {
+  return readCred("BATTLE_NET_REDIRECT_URI") ?? null;
+}
+
+export function isUserOAuthConfigured(): boolean {
+  return Boolean(readCred("BATTLE_NET_CLIENT_ID") && readCred("BATTLE_NET_REDIRECT_URI"));
+}
+
+export function buildAuthorizeUrl(region: Region, state: string): string | null {
+  if (!isUserOAuthConfigured()) return null;
+  const { id } = creds();
+  const host = OAUTH_HOSTS[region];
+  const params = new URLSearchParams({
+    client_id: id,
+    scope: OAUTH_SCOPES.join(" "),
+    state,
+    redirect_uri: readCred("BATTLE_NET_REDIRECT_URI")!,
+    response_type: "code",
+  });
+  return `https://${host}/authorize?${params.toString()}`;
+}
+
+export async function exchangeUserToken(
+  region: Region,
+  code: string
+): Promise<UserTokenResponse> {
+  const { id, secret } = creds();
+  const host = OAUTH_HOSTS[region];
+  const auth = Buffer.from(`${id}:${secret}`).toString("base64");
+
+  const body = new URLSearchParams({
+    grant_type: "authorization_code",
+    scope: OAUTH_SCOPES.join(" "),
+    code,
+    redirect_uri: readCred("BATTLE_NET_REDIRECT_URI")!,
+  });
+
+  const res = await fetch(`https://${host}/token`, {
+    method: "POST",
+    headers: {
+      Authorization: `Basic ${auth}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body,
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`Battle.net token exchange failed (${res.status}): ${text.slice(0, 200)}`);
+  }
+
+  return (await res.json()) as UserTokenResponse;
+}
+
+export type UserSession = {
+  region: Region;
+  accessToken: string;
+  expiresAt: number;
+  accountId?: string;
+};
+
+export const SESSION_COOKIE = "bnet_session";
+
+function sessionSecret(): string {
+  return readCred("SESSION_SECRET") ?? "dev-insecure-secret-change-me";
+}
+
+const enc = new TextEncoder();
+const dec = new TextDecoder();
+
+function xorCipher(input: string, secret: string, encrypt: boolean): string {
+  const data = enc.encode(input);
+  const key = enc.encode(secret);
+  const out = new Uint8Array(data.length);
+  for (let i = 0; i < data.length; i++) {
+    out[i] = data[i] ^ key[i % key.length];
+  }
+  const bytes = encrypt ? out : out;
+  return encrypt ? Buffer.from(bytes).toString("base64") : dec.decode(bytes);
+}
+
+export function encodeSessionCookie(session: UserSession): string {
+  const payload = JSON.stringify(session);
+  return xorCipher(payload, sessionSecret(), true);
+}
+
+export function decodeSessionCookie(raw: string | undefined): UserSession | null {
+  if (!raw) return null;
+  try {
+    const json = xorCipher(raw, sessionSecret(), false);
+    const parsed = JSON.parse(json) as UserSession;
+    if (!parsed || typeof parsed.accessToken !== "string" || !parsed.expiresAt) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+export function validRegions(): Region[] {
+  return REGIONS;
 }

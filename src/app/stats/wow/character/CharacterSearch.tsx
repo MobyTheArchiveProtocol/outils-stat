@@ -1,16 +1,16 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 import Image from "next/image";
 
 import { DEFAULT_REGION, REGIONS, type Region } from "@/lib/blizzard/regions";
-import type { CharacterProfile, CharacterProgression } from "@/lib/blizzard/types";
+import type { CharacterDetails, CharacterProfile, CharacterProgression } from "@/lib/blizzard/types";
 
 type State =
   | { status: "idle" }
   | { status: "loading" }
   | { status: "error"; message: string; notFound?: boolean }
-  | { status: "success"; data: CharacterProfile; progression: CharacterProgression | null };
+  | { status: "success"; data: CharacterProfile; progression: CharacterProgression | null; details: CharacterDetails | null };
 
 const QUALITY_COLORS: Record<string, string> = {
   POOR: "#9d9d9d",
@@ -54,7 +54,7 @@ export default function CharacterSearch() {
         return;
       }
       const data = json as CharacterProfile;
-      setState({ status: "success", data, progression: null });
+      setState({ status: "success", data, progression: null, details: null });
 
       try {
         const progRes = await fetch(`/api/blizzard/wow/character/progression?${params.toString()}`, {
@@ -62,10 +62,26 @@ export default function CharacterSearch() {
         });
         if (progRes.ok) {
           const progJson = await progRes.json();
-          setState({ status: "success", data, progression: progJson as CharacterProgression });
+          setState({ status: "success", data, progression: progJson as CharacterProgression, details: null });
         }
       } catch {
         // progression stays null — already displayed profile
+      }
+
+      try {
+        const detailsRes = await fetch(`/api/blizzard/wow/character/details?${params.toString()}`, {
+          cache: "no-store",
+        });
+        if (detailsRes.ok) {
+          const detailsJson = await detailsRes.json();
+          setState((prev) =>
+            prev.status === "success"
+              ? { ...prev, details: detailsJson as CharacterDetails }
+              : prev
+          );
+        }
+      } catch {
+        // details stays null
       }
     } catch (e) {
       setState({ status: "error", message: e instanceof Error ? e.message : "Erreur réseau" });
@@ -157,7 +173,7 @@ export default function CharacterSearch() {
       )}
 
       {state.status === "success" && (
-        <ProfileView data={state.data} progression={state.progression} />
+        <ProfileView data={state.data} progression={state.progression} details={state.details} />
       )}
     </div>
   );
@@ -175,9 +191,11 @@ function StatRow({ label, value }: { label: string; value: string | number | nul
 function ProfileView({
   data,
   progression,
+  details,
 }: {
   data: CharacterProfile;
   progression: CharacterProgression | null;
+  details: CharacterDetails | null;
 }) {
   return (
     <div className="flex flex-col gap-6">
@@ -254,6 +272,8 @@ function ProfileView({
       ) : (
         <ProgressionSections progression={progression} />
       )}
+
+      {details !== null && <DetailsSections details={details} />}
     </div>
   );
 }
@@ -366,6 +386,219 @@ function ProgressionSections({ progression }: { progression: CharacterProgressio
               ))}
           </ul>
         </div>
+      )}
+    </div>
+  );
+}
+
+function Section({
+  title,
+  right,
+  children,
+  empty,
+}: {
+  title: string;
+  right?: ReactNode;
+  children: ReactNode;
+  empty?: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6">
+      <div className="flex items-center justify-between">
+        <h3 className="font-mono text-xs uppercase tracking-widest text-[var(--muted)]">{title}</h3>
+        {right}
+      </div>
+      {empty ? <p className="mt-4 text-sm text-[var(--muted)]">{empty}</p> : <div className="mt-4">{children}</div>}
+    </div>
+  );
+}
+
+function DetailsSections({ details }: { details: CharacterDetails }) {
+  return (
+    <div className="flex flex-col gap-6">
+      {details.collections && (
+        <Section
+          title="Collections"
+          right={
+            <span className="font-mono text-sm tabular-nums text-[var(--accent)]">
+              {details.collections.mounts?.length ?? 0} montures ·{" "}
+              {details.collections.pets?.length ?? 0} mascottes ·{" "}
+              {details.collections.toys?.length ?? 0} jouets
+            </span>
+          }
+          empty={
+            details.collections.needsAuth
+              ? "Collections nécessite un flux OAuth utilisateur ( connexion Battle.net )."
+              : undefined
+          }
+        >
+          <ul className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            {[
+              ...(details.collections.mounts ?? []).map((m) => ({ name: m.name, sub: m.isFavorite ? "★ favori" : "monture" })),
+              ...(details.collections.pets ?? []).map((p) => ({
+                name: p.name,
+                sub: `mascotte · niv. ${p.level} · ${p.qualityName}`,
+              })),
+              ...(details.collections.toys ?? []).map((t) => ({ name: t.name, sub: "jouet" })),
+            ]
+              .slice(0, 30)
+              .map((item, i) => (
+                <li key={i} className="truncate text-sm">
+                  <span>{item.name}</span>
+                  <span className="ml-1 text-xs text-[var(--muted)]">{item.sub}</span>
+                </li>
+              ))}
+          </ul>
+        </Section>
+      )}
+
+      {details.raids && details.raids.expansions.length > 0 && (
+        <Section title="Raids">
+          <div className="flex flex-col gap-4">
+            {details.raids.expansions.map((exp, ei) => (
+              <div key={ei}>
+                <p className="mb-1 text-sm font-medium">{exp.name}</p>
+                {exp.instances.map((inst, ii) => (
+                  <div key={ii} className="mb-1.5">
+                    <p className="text-xs text-[var(--muted)]">{inst.name}</p>
+                    {inst.modes.map((mode, mi) => (
+                      <div key={mi} className="flex items-center justify-between text-sm">
+                        <span className="text-[var(--muted)]">{mode.difficultyName}</span>
+                        <span className="font-mono tabular-nums">
+                          {mode.completedCount}/{mode.totalCount} · {mode.statusName}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {details.dungeons && details.dungeons.expansions.length > 0 && (
+        <Section title="Donjons">
+          <div className="flex flex-col gap-4">
+            {details.dungeons.expansions.map((exp, ei) => (
+              <div key={ei}>
+                <p className="mb-1 text-sm font-medium">{exp.name}</p>
+                {exp.instances.map((inst, ii) => (
+                  <div key={ii} className="mb-1.5">
+                    <p className="text-xs text-[var(--muted)]">{inst.name}</p>
+                    {inst.modes.map((mode, mi) => (
+                      <div key={mi} className="flex items-center justify-between text-sm">
+                        <span className="text-[var(--muted)]">{mode.difficultyName}</span>
+                        <span className="font-mono tabular-nums">
+                          {mode.completedCount}/{mode.totalCount} · {mode.statusName}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {details.pvp && (
+        <Section
+          title="PvP"
+          right={
+            <span className="font-mono text-sm tabular-nums text-[var(--accent)]">
+              {details.pvp.honorLevel} honneur · {details.pvp.honorableKills.toLocaleString("fr-FR")} kills
+            </span>
+          }
+        >
+          <div className="flex flex-col gap-4">
+            {details.pvp.brackets.length > 0 && (
+              <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {details.pvp.brackets.map((b, i) => (
+                  <li key={i} className="text-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium uppercase">{b.bracket}</span>
+                      <span className="font-mono tabular-nums text-[var(--accent)]">{b.rating}</span>
+                    </div>
+                    <div className="text-xs text-[var(--muted)]">
+                      saison {b.seasonWon}–{b.seasonLost} ({b.seasonPlayed}) · semaine {b.weeklyWon}–{b.weeklyLost}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {details.pvp.mapStatistics.length > 0 && (
+              <ul className="divide-y divide-[var(--border)]">
+                {details.pvp.mapStatistics.map((m, i) => (
+                  <li key={i} className="flex items-center justify-between py-2 text-sm">
+                    <span>{m.mapName}</span>
+                    <span className="font-mono tabular-nums text-[var(--muted)]">
+                      {m.won}–{m.lost} ({m.played})
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </Section>
+      )}
+
+      {details.professions &&
+        (details.professions.primaries.length > 0 || details.professions.secondaries.length > 0) && (
+          <Section title="Professions">
+            <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {[...details.professions.primaries, ...details.professions.secondaries].map((p, i) => (
+                <li key={i} className="text-sm">
+                  <span className="font-medium">{p.name}</span>
+                  {p.tiers.map((t, ti) => (
+                    <span key={ti} className="ml-2 text-xs text-[var(--muted)]">
+                      {t.tierName} {t.skillPoints}/{t.maxSkillPoints} ({t.recipeCount} recettes)
+                    </span>
+                  ))}
+                </li>
+              ))}
+            </ul>
+          </Section>
+        )}
+
+      {details.reputations && details.reputations.length > 0 && (
+        <Section title="Réputations">
+          <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {details.reputations
+              .filter((r) => r.tier > 0)
+              .slice(0, 30)
+              .map((r, i) => (
+                <li key={i} className="flex items-center justify-between text-sm">
+                  <span className="truncate pr-2">{r.faction}</span>
+                  <span className="font-mono tabular-nums text-[var(--muted)]">
+                    {r.standingName} ({r.value}/{r.max})
+                  </span>
+                </li>
+              ))}
+          </ul>
+        </Section>
+      )}
+
+      {details.titles && details.titles.list.length > 0 && (
+        <Section
+          title="Titres"
+          right={
+            <span className="font-mono text-sm tabular-nums text-[var(--accent)]">
+              {details.titles.list.length}
+            </span>
+          }
+        >
+          {details.titles.active && (
+            <p className="mb-3 text-sm text-[var(--accent)]">« {details.titles.active} » (actif)</p>
+          )}
+          <ul className="grid grid-cols-1 gap-1 sm:grid-cols-2">
+            {details.titles.list.slice(0, 40).map((t, i) => (
+              <li key={i} className="truncate text-sm text-[var(--muted)]">
+                {t}
+              </li>
+            ))}
+          </ul>
+        </Section>
       )}
     </div>
   );

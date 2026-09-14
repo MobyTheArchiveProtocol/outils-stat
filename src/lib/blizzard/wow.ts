@@ -5,12 +5,25 @@ import { type Locale, type Region } from "./regions";
 import type {
   CharacterAchievementsStatistics,
   CharacterAchievementsSummary,
+  CharacterCollections,
+  CharacterDetails,
+  CharacterDungeons,
+  CharacterEncounters,
   CharacterEquipmentSummary,
   CharacterMediaSummary,
+  CharacterMountsCollection,
+  CharacterPetsCollection,
+  CharacterProfessions,
   CharacterProfile,
   CharacterProfileSummary,
   CharacterProgression,
+  CharacterPvPBracket,
+  CharacterPvPSummary,
+  CharacterRaids,
+  CharacterReputations,
   CharacterStatus,
+  CharacterTitles,
+  CharacterToysCollection,
   ConnectedRealm,
   ConnectedRealmsIndex,
   MythicKeystoneProfileIndex,
@@ -250,4 +263,192 @@ export async function getCharacterProgression(
   }
 
   return { achievements, statistics, mythicPlus };
+}
+
+const PVP_BRACKETS = ["2v2", "3v3", "rbg", "shuffle", "blitz"] as const;
+
+type EncounterAgg = NonNullable<CharacterDetails["raids"]>["expansions"][number];
+
+type EncounterInstanceAgg = EncounterAgg["instances"][number];
+
+type EncounterModeAgg = EncounterInstanceAgg["modes"][number];
+
+function mapEncounters(data: CharacterEncounters): NonNullable<CharacterDetails["raids"]> {
+  return {
+    expansions: data.expansions.map((exp): EncounterAgg => ({
+      name: pickLocal(exp.expansion.name, String(exp.expansion.id)),
+      instances: exp.instances.map((inst): EncounterInstanceAgg => ({
+        name: pickLocal(inst.instance.name, String(inst.instance.id)),
+        modes: inst.modes.map((mode): EncounterModeAgg => ({
+          difficulty: mode.difficulty.type,
+          difficultyName: pickLocal(mode.difficulty.name, mode.difficulty.type),
+          status: mode.status.type,
+          statusName: pickLocal(mode.status.name, mode.status.type),
+          completedCount: mode.progress.completed_count,
+          totalCount: mode.progress.total_count,
+        })),
+      })),
+    })),
+  };
+}
+
+export async function getCharacterDetails(
+  region: Region,
+  realmInput: string,
+  nameInput: string
+): Promise<CharacterDetails> {
+  const realm = normalizeRealm(realmInput);
+  const name = normalizeName(nameInput);
+  const empty: CharacterDetails = {
+    collections: null,
+    raids: null,
+    dungeons: null,
+    pvp: null,
+    professions: null,
+    reputations: null,
+    titles: null,
+  };
+  if (!realm || !name) return empty;
+
+  const ns = namespaceFor(region, "profile");
+  const base = `/profile/wow/character/${encodeURIComponent(realm)}/${encodeURIComponent(name)}`;
+
+  const [
+    mountsRes,
+    petsRes,
+    toysRes,
+    raidsRes,
+    dungeonsRes,
+    pvpSummaryRes,
+    professionsRes,
+    reputationsRes,
+    titlesRes,
+  ] = await Promise.allSettled([
+    blizzardGet<CharacterMountsCollection>({ region, namespace: ns, path: `${base}/collections/mounts`, revalidate: 60 }),
+    blizzardGet<CharacterPetsCollection>({ region, namespace: ns, path: `${base}/collections/pets`, revalidate: 60 }),
+    blizzardGet<CharacterToysCollection>({ region, namespace: ns, path: `${base}/collections/toys`, revalidate: 60 }),
+    blizzardGet<CharacterRaids>({ region, namespace: ns, path: `${base}/encounters/raids`, revalidate: 60 }),
+    blizzardGet<CharacterDungeons>({ region, namespace: ns, path: `${base}/encounters/dungeons`, revalidate: 60 }),
+    blizzardGet<CharacterPvPSummary>({ region, namespace: ns, path: `${base}/pvp-summary`, revalidate: 60 }),
+    blizzardGet<CharacterProfessions>({ region, namespace: ns, path: `${base}/professions`, revalidate: 60 }),
+    blizzardGet<CharacterReputations>({ region, namespace: ns, path: `${base}/reputations`, revalidate: 60 }),
+    blizzardGet<CharacterTitles>({ region, namespace: ns, path: `${base}/titles`, revalidate: 60 }),
+  ]);
+
+  let collections: CharacterCollections | null = null;
+  if (mountsRes.status === "fulfilled" || petsRes.status === "fulfilled" || toysRes.status === "fulfilled") {
+    collections = {
+      mounts:
+        mountsRes.status === "fulfilled"
+          ? mountsRes.value.mounts.map((m) => ({
+              name: pickLocal(m.mount.name, String(m.mount.id)),
+              id: m.mount.id,
+              isFavorite: m.is_favorite ?? false,
+            }))
+          : null,
+      pets:
+        petsRes.status === "fulfilled"
+          ? petsRes.value.pets.map((p) => ({
+              name: pickLocal(p.species.name, String(p.species.id)),
+              id: p.species.id,
+              level: p.level,
+              quality: p.quality.type,
+              qualityName: pickLocal(p.quality.name, p.quality.type),
+              health: p.stats.health,
+              power: p.stats.power,
+              speed: p.stats.speed,
+            }))
+          : null,
+      toys:
+        toysRes.status === "fulfilled"
+          ? toysRes.value.toys.map((t) => ({ name: pickLocal(t.toy.name, String(t.toy.id)), id: t.toy.id }))
+          : null,
+      needsAuth: false,
+    };
+  } else {
+    collections = { mounts: null, pets: null, toys: null, needsAuth: true };
+  }
+
+  const raids = raidsRes.status === "fulfilled" ? mapEncounters(raidsRes.value) : null;
+  const dungeons = dungeonsRes.status === "fulfilled" ? mapEncounters(dungeonsRes.value) : null;
+
+  let pvp: CharacterDetails["pvp"] = null;
+  if (pvpSummaryRes.status === "fulfilled") {
+    const summary = pvpSummaryRes.value;
+    const bracketResults = await Promise.allSettled(
+      PVP_BRACKETS.map((bracket) =>
+        blizzardGet<CharacterPvPBracket>({ region, namespace: ns, path: `${base}/pvp-bracket/${bracket}`, revalidate: 60 })
+      )
+    );
+    const brackets = bracketResults
+      .map((res, i) =>
+        res.status === "fulfilled" && res.value.rating > 0
+          ? {
+              bracket: PVP_BRACKETS[i],
+              rating: res.value.rating,
+              seasonId: res.value.season.id,
+              seasonPlayed: res.value.season_match_statistics.played,
+              seasonWon: res.value.season_match_statistics.won,
+              seasonLost: res.value.season_match_statistics.lost,
+              weeklyPlayed: res.value.weekly_match_statistics.played,
+              weeklyWon: res.value.weekly_match_statistics.won,
+              weeklyLost: res.value.weekly_match_statistics.lost,
+            }
+          : null
+      )
+      .filter((b): b is NonNullable<typeof b> => b !== null);
+    pvp = {
+      honorableKills: summary.honorable_kills,
+      honorLevel: summary.honor_level,
+      mapStatistics: summary.pvp_map_statistics.map((s) => ({
+        mapName: pickLocal(s.world_map.name, String(s.world_map.id)),
+        played: s.match_statistics.played,
+        won: s.match_statistics.won,
+        lost: s.match_statistics.lost,
+      })),
+      brackets,
+    };
+  }
+
+  const professions: CharacterDetails["professions"] = professionsRes.status === "fulfilled"
+    ? {
+        primaries: professionsRes.value.primaries.map((p) => ({
+          name: pickLocal(p.profession.name, String(p.profession.id)),
+          tiers: p.tiers.map((t) => ({
+            tierName: pickLocal(t.tier.name, String(t.tier.id)),
+            skillPoints: t.skill_points,
+            maxSkillPoints: t.max_skill_points,
+            recipeCount: t.known_recipes.length,
+          })),
+        })),
+        secondaries: professionsRes.value.secondaries.map((p) => ({
+          name: pickLocal(p.profession.name, String(p.profession.id)),
+          tiers: p.tiers.map((t) => ({
+            tierName: pickLocal(t.tier.name, String(t.tier.id)),
+            skillPoints: t.skill_points,
+            maxSkillPoints: t.max_skill_points,
+            recipeCount: t.known_recipes.length,
+          })),
+        })),
+      }
+    : null;
+
+  const reputations: CharacterDetails["reputations"] = reputationsRes.status === "fulfilled"
+    ? reputationsRes.value.reputations.map((r) => ({
+        faction: pickLocal(r.faction.name, String(r.faction.id)),
+        tier: r.standing.tier,
+        standingName: pickLocal(r.standing.name, String(r.standing.tier)),
+        value: r.standing.value,
+        max: r.standing.max,
+      }))
+    : null;
+
+  const titles: CharacterDetails["titles"] = titlesRes.status === "fulfilled"
+    ? {
+        active: titlesRes.value.active_title ? pickLocal(titlesRes.value.active_title.display_string, pickLocal(titlesRes.value.active_title.name, "")) : null,
+        list: titlesRes.value.titles.map((t) => pickLocal(t.name, String(t.id))),
+      }
+    : null;
+
+  return { collections, raids, dungeons, pvp, professions, reputations, titles };
 }
