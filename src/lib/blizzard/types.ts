@@ -209,9 +209,9 @@ export type CharacterProgression = {
   } | null;
 };
 
-type NamedRef = { name: LocalizedField; id: number; key?: SelfRef };
+type NamedRef = { name: LocalizedField | string; id: number; key?: SelfRef };
 
-type TypeNamedRef = { type: string; name: LocalizedField };
+type TypeNamedRef = { type: string; name: LocalizedField | string };
 
 type EncounterProgress = {
   completed_count: number;
@@ -276,7 +276,7 @@ export type CharacterPvPSummary = {
   honor_level: number;
   brackets: { href: string }[];
   pvp_map_statistics: {
-    world_map: { name: LocalizedField; id: number };
+    world_map: { name: LocalizedField | string; id: number };
     match_statistics: { played: number; won: number; lost: number };
   }[];
 };
@@ -295,7 +295,7 @@ export type CharacterPvPBracket = {
 type ProfessionTier = {
   skill_points: number;
   max_skill_points: number;
-  tier: { name: LocalizedField; id: number };
+  tier: { name: LocalizedField | string; id: number };
   known_recipes: NamedRef[];
 };
 
@@ -312,7 +312,7 @@ export type CharacterReputations = {
       value: number;
       max: number;
       tier: number;
-      name: LocalizedField;
+      name: LocalizedField | string;
       renown_level?: number;
     };
     paragon?: { raw: number; value: number; max: number };
@@ -320,7 +320,7 @@ export type CharacterReputations = {
 };
 
 export type CharacterTitles = {
-  active_title?: { name: LocalizedField; id: number; display_string: LocalizedField } | null;
+  active_title?: { name: LocalizedField | string; id: number; display_string: LocalizedField | string } | null;
   titles: NamedRef[];
 };
 

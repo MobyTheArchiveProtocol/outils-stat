@@ -42,8 +42,9 @@ export async function getConnectedRealmsIndex(region: Parameters<typeof blizzard
   return { hrefs: (data.connected_realms ?? []).map((r) => r.href) };
 }
 
-function pickLocal(field: { [locale: string]: string } | undefined, fallback: string): string {
-  if (!field) return fallback;
+function pickLocal(field: { [locale: string]: string } | string | undefined, fallback: string): string {
+  if (field === undefined || field === null) return fallback;
+  if (typeof field === "string") return field;
   return field.en_US ?? field.en_GB ?? Object.values(field)[0] ?? fallback;
 }
 
