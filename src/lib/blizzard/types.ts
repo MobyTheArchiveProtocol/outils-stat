@@ -64,3 +64,82 @@ export type RegionStat = {
   byPopulation: Record<string, number>;
   topRealms: { name: string; slug: string; status: string; population: string; hasQueue: boolean }[];
 };
+
+type TypeRef = { type: string; name: LocalizedField };
+
+type CharacterRef = {
+  name: LocalizedField;
+  slug?: string;
+  realm?: { name: LocalizedField; slug: string; id: number; key?: SelfRef };
+};
+
+type EquippedItem = {
+  item: { id: number; name: LocalizedField };
+  slot: { type: string; name: LocalizedField };
+  level: { value: number };
+  quality: { type: string; name: LocalizedField };
+  name?: LocalizedField;
+};
+
+type CharacterMedia = {
+  avatar_url?: string;
+  bust_url?: string;
+  render_url?: string;
+  character: CharacterRef;
+};
+
+export type CharacterProfileSummary = {
+  id: number;
+  name: LocalizedField;
+  level: number;
+  achievement_points: number;
+  gender: TypeRef;
+  faction: TypeRef;
+  race: { name: LocalizedField };
+  character_class: { id: number; name: LocalizedField };
+  active_spec: { name: LocalizedField };
+  realm: { id: number; name: LocalizedField; slug: string };
+  guild?: { name: LocalizedField };
+  average_item_level: number;
+  equipped_item_level: number;
+  pvp_summary?: { honor_level: number; pvp_map: LocalizedField };
+};
+
+export type CharacterStatus = {
+  is_valid: boolean;
+  id: number;
+};
+
+export type CharacterEquipmentSummary = {
+  character: CharacterRef;
+  equipped_items: EquippedItem[];
+};
+
+export type CharacterMediaSummary = CharacterMedia;
+
+export type CharacterProfile = {
+  region: Region;
+  name: string;
+  realmSlug: string;
+  realmName: string;
+  level: number;
+  achievementPoints: number;
+  averageItemLevel: number;
+  equippedItemLevel: number;
+  className: string;
+  specName: string;
+  raceName: string;
+  genderName: string;
+  factionName: string;
+  guildName: string | null;
+  isValid: boolean;
+  avatarUrl: string | null;
+  renderUrl: string | null;
+  equipment: {
+    slot: string;
+    slotName: string;
+    name: string;
+    level: number;
+    quality: string;
+  }[];
+};

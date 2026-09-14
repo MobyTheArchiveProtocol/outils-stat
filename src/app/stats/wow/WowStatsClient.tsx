@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 import { REGIONS, type Region } from "@/lib/blizzard/regions";
 import type { RegionStat } from "@/lib/blizzard/types";
@@ -52,6 +53,12 @@ export default function WowStatsClient({ initialRegion }: { initialRegion: Regio
           <p className="mt-1 text-sm text-[var(--muted)]">
             Statut des royaumes connectés · source Battle.net API
           </p>
+          <Link
+            href="/stats/wow/character"
+            className="mt-2 inline-block font-mono text-xs text-[var(--foreground)] underline-offset-4 hover:underline"
+          >
+            rechercher un personnage →
+          </Link>
         </div>
         <div className="flex items-center gap-2">
           <label htmlFor="region" className="font-mono text-xs uppercase tracking-widest text-[var(--muted)]">

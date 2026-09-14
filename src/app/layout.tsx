@@ -41,6 +41,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               <Link href="/stats/wow" className="transition-colors hover:text-[var(--foreground)]">
                 WoW
               </Link>
+              <Link href="/stats/wow/character" className="transition-colors hover:text-[var(--foreground)]">
+                Personnage
+              </Link>
               <Link href="/a-propos" className="transition-colors hover:text-[var(--foreground)]">
                 À propos
               </Link>
