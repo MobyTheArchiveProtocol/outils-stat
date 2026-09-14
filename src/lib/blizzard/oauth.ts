@@ -16,9 +16,14 @@ type CachedToken = {
 const cache = new Map<Region, CachedToken>();
 const inflight = new Map<Region, Promise<CachedToken>>();
 
+function readCred(name: string): string | undefined {
+  const value = process.env[name];
+  return value ? value.trim() : undefined;
+}
+
 function creds(): { id: string; secret: string } {
-  const id = process.env.BATTLE_NET_CLIENT_ID;
-  const secret = process.env.BATTLE_NET_CLIENT_SECRET;
+  const id = readCred("BATTLE_NET_CLIENT_ID");
+  const secret = readCred("BATTLE_NET_CLIENT_SECRET");
   if (!id || !secret) {
     throw new Error(
       "Battle.net credentials missing. Set BATTLE_NET_CLIENT_ID and BATTLE_NET_CLIENT_SECRET in your environment."
@@ -28,7 +33,7 @@ function creds(): { id: string; secret: string } {
 }
 
 export function isBlizzardConfigured(): boolean {
-  return Boolean(process.env.BATTLE_NET_CLIENT_ID && process.env.BATTLE_NET_CLIENT_SECRET);
+  return Boolean(readCred("BATTLE_NET_CLIENT_ID") && readCred("BATTLE_NET_CLIENT_SECRET"));
 }
 
 async function fetchToken(region: Region): Promise<CachedToken> {
