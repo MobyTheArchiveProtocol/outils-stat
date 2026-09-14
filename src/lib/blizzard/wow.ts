@@ -39,7 +39,7 @@ export async function getConnectedRealmsIndex(region: Parameters<typeof blizzard
     path: "/data/wow/connected-realm/index",
     revalidate: 60,
   });
-  return { hrefs: data.connected_realms.map((r) => r.href) };
+  return { hrefs: (data.connected_realms ?? []).map((r) => r.href) };
 }
 
 function pickLocal(field: { [locale: string]: string } | undefined, fallback: string): string {
@@ -77,7 +77,7 @@ export async function getConnectedRealm(
     statusName: pickLocal(data.status.name, data.status.type),
     populationType: data.population.type,
     populationName: pickLocal(data.population.name, data.population.type),
-    realms: data.realms.map((r) => ({ name: pickLocal(r.name, r.slug), slug: r.slug })),
+    realms: (data.realms ?? []).map((r) => ({ name: pickLocal(r.name, r.slug), slug: r.slug })),
   };
 }
 
@@ -157,7 +157,7 @@ export async function getCharacterProfile(
     avatarUrl: media?.avatar_url ?? null,
     renderUrl: media?.render_url ?? null,
     equipment: equipment
-      ? equipment.equipped_items.map((e) => ({
+      ? (equipment.equipped_items ?? []).map((e) => ({
           slot: e.slot.type,
           slotName: pickLocal(e.slot.name, e.slot.type),
           name: e.name ? pickLocal(e.name, pickLocal(e.item.name, String(e.item.id))) : pickLocal(e.item.name, String(e.item.id)),
@@ -206,7 +206,7 @@ export async function getCharacterProgression(
       ? {
           totalQuantity: achRes.value.total_quantity,
           totalPoints: achRes.value.total_points,
-          recent: achRes.value.achievements
+          recent: (achRes.value.achievements ?? [])
             .filter((a) => a.completed_timestamp || a.criteria?.is_completed)
             .sort((a, b) => (b.completed_timestamp ?? 0) - (a.completed_timestamp ?? 0))
             .slice(0, 12)
@@ -219,8 +219,8 @@ export async function getCharacterProgression(
 
   const statistics =
     statsRes.status === "fulfilled"
-      ? statsRes.value.statistics.flatMap((cat) =>
-          cat.statistics
+      ? (statsRes.value.statistics ?? []).flatMap((cat) =>
+          (cat.statistics ?? [])
             .filter((s) => s.quantity > 0)
             .map((s) => ({
               category: pickLocal(cat.name, String(cat.id)),
@@ -244,13 +244,13 @@ export async function getCharacterProgression(
         });
         mythicPlus = {
           seasonId,
-          bestRuns: season.best_runs.map((r) => ({
+          bestRuns: (season.best_runs ?? []).map((r) => ({
             dungeonName: pickLocal(r.dungeon.name, String(r.dungeon.id)),
             keystoneLevel: r.keystone_level,
             duration: r.duration,
             completedWithinTime: r.is_completed_within_time,
             completedAt: r.completed_timestamp,
-            affixes: r.keystone_affixes.map((a) => pickLocal(a.name, String(a.id))),
+            affixes: (r.keystone_affixes ?? []).map((a) => pickLocal(a.name, String(a.id))),
             score: r.map_rating?.value ?? null,
           })),
         };
@@ -275,11 +275,11 @@ type EncounterModeAgg = EncounterInstanceAgg["modes"][number];
 
 function mapEncounters(data: CharacterEncounters): NonNullable<CharacterDetails["raids"]> {
   return {
-    expansions: data.expansions.map((exp): EncounterAgg => ({
+    expansions: (data.expansions ?? []).map((exp): EncounterAgg => ({
       name: pickLocal(exp.expansion.name, String(exp.expansion.id)),
-      instances: exp.instances.map((inst): EncounterInstanceAgg => ({
+      instances: (exp.instances ?? []).map((inst): EncounterInstanceAgg => ({
         name: pickLocal(inst.instance.name, String(inst.instance.id)),
-        modes: inst.modes.map((mode): EncounterModeAgg => ({
+        modes: (inst.modes ?? []).map((mode): EncounterModeAgg => ({
           difficulty: mode.difficulty.type,
           difficultyName: pickLocal(mode.difficulty.name, mode.difficulty.type),
           status: mode.status.type,
@@ -350,7 +350,7 @@ export async function getCharacterDetails(
     collections = {
       mounts:
         mountsRes.status === "fulfilled"
-          ? mountsRes.value.mounts.map((m) => ({
+          ? (mountsRes.value.mounts ?? []).map((m) => ({
               name: pickLocal(m.mount.name, String(m.mount.id)),
               id: m.mount.id,
               isFavorite: m.is_favorite ?? false,
@@ -358,7 +358,7 @@ export async function getCharacterDetails(
           : null,
       pets:
         petsRes.status === "fulfilled"
-          ? petsRes.value.pets.map((p) => ({
+          ? (petsRes.value.pets ?? []).map((p) => ({
               name: pickLocal(p.species.name, String(p.species.id)),
               id: p.species.id,
               level: p.level,
@@ -371,7 +371,7 @@ export async function getCharacterDetails(
           : null,
       toys:
         toysRes.status === "fulfilled"
-          ? toysRes.value.toys.map((t) => ({ name: pickLocal(t.toy.name, String(t.toy.id)), id: t.toy.id }))
+          ? (toysRes.value.toys ?? []).map((t) => ({ name: pickLocal(t.toy.name, String(t.toy.id)), id: t.toy.id }))
           : null,
       needsAuth: false,
     };
@@ -412,7 +412,7 @@ export async function getCharacterDetails(
     pvp = {
       honorableKills: summary.honorable_kills,
       honorLevel: summary.honor_level,
-      mapStatistics: summary.pvp_map_statistics.map((s) => ({
+      mapStatistics: (summary.pvp_map_statistics ?? []).map((s) => ({
         mapName: pickLocal(s.world_map.name, String(s.world_map.id)),
         played: s.match_statistics.played,
         won: s.match_statistics.won,
@@ -424,29 +424,29 @@ export async function getCharacterDetails(
 
   const professions: CharacterDetails["professions"] = professionsRes.status === "fulfilled"
     ? {
-        primaries: professionsRes.value.primaries.map((p) => ({
+        primaries: (professionsRes.value.primaries ?? []).map((p) => ({
           name: pickLocal(p.profession.name, String(p.profession.id)),
-          tiers: p.tiers.map((t) => ({
+          tiers: (p.tiers ?? []).map((t) => ({
             tierName: pickLocal(t.tier.name, String(t.tier.id)),
             skillPoints: t.skill_points,
             maxSkillPoints: t.max_skill_points,
-            recipeCount: t.known_recipes.length,
+            recipeCount: (t.known_recipes ?? []).length,
           })),
         })),
-        secondaries: professionsRes.value.secondaries.map((p) => ({
+        secondaries: (professionsRes.value.secondaries ?? []).map((p) => ({
           name: pickLocal(p.profession.name, String(p.profession.id)),
-          tiers: p.tiers.map((t) => ({
+          tiers: (p.tiers ?? []).map((t) => ({
             tierName: pickLocal(t.tier.name, String(t.tier.id)),
             skillPoints: t.skill_points,
             maxSkillPoints: t.max_skill_points,
-            recipeCount: t.known_recipes.length,
+            recipeCount: (t.known_recipes ?? []).length,
           })),
         })),
       }
     : null;
 
   const reputations: CharacterDetails["reputations"] = reputationsRes.status === "fulfilled"
-    ? reputationsRes.value.reputations.map((r) => ({
+    ? (reputationsRes.value.reputations ?? []).map((r) => ({
         faction: pickLocal(r.faction.name, String(r.faction.id)),
         tier: r.standing.tier,
         standingName: pickLocal(r.standing.name, String(r.standing.tier)),
@@ -458,7 +458,7 @@ export async function getCharacterDetails(
   const titles: CharacterDetails["titles"] = titlesRes.status === "fulfilled"
     ? {
         active: titlesRes.value.active_title ? pickLocal(titlesRes.value.active_title.display_string, pickLocal(titlesRes.value.active_title.name, "")) : null,
-        list: titlesRes.value.titles.map((t) => pickLocal(t.name, String(t.id))),
+        list: (titlesRes.value.titles ?? []).map((t) => pickLocal(t.name, String(t.id))),
       }
     : null;
 
