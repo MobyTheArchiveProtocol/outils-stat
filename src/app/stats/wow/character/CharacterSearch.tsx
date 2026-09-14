@@ -4,13 +4,13 @@ import { useCallback, useState } from "react";
 import Image from "next/image";
 
 import { DEFAULT_REGION, REGIONS, type Region } from "@/lib/blizzard/regions";
-import type { CharacterProfile } from "@/lib/blizzard/types";
+import type { CharacterProfile, CharacterProgression } from "@/lib/blizzard/types";
 
 type State =
   | { status: "idle" }
   | { status: "loading" }
   | { status: "error"; message: string; notFound?: boolean }
-  | { status: "success"; data: CharacterProfile };
+  | { status: "success"; data: CharacterProfile; progression: CharacterProgression | null };
 
 const QUALITY_COLORS: Record<string, string> = {
   POOR: "#9d9d9d",
@@ -53,7 +53,20 @@ export default function CharacterSearch() {
         setState({ status: "error", message: json?.error ?? `Erreur ${res.status}` });
         return;
       }
-      setState({ status: "success", data: json as CharacterProfile });
+      const data = json as CharacterProfile;
+      setState({ status: "success", data, progression: null });
+
+      try {
+        const progRes = await fetch(`/api/blizzard/wow/character/progression?${params.toString()}`, {
+          cache: "no-store",
+        });
+        if (progRes.ok) {
+          const progJson = await progRes.json();
+          setState({ status: "success", data, progression: progJson as CharacterProgression });
+        }
+      } catch {
+        // progression stays null — already displayed profile
+      }
     } catch (e) {
       setState({ status: "error", message: e instanceof Error ? e.message : "Erreur réseau" });
     }
@@ -143,7 +156,9 @@ export default function CharacterSearch() {
         </div>
       )}
 
-      {state.status === "success" && <ProfileView data={state.data} />}
+      {state.status === "success" && (
+        <ProfileView data={state.data} progression={state.progression} />
+      )}
     </div>
   );
 }
@@ -157,7 +172,13 @@ function StatRow({ label, value }: { label: string; value: string | number | nul
   );
 }
 
-function ProfileView({ data }: { data: CharacterProfile }) {
+function ProfileView({
+  data,
+  progression,
+}: {
+  data: CharacterProfile;
+  progression: CharacterProgression | null;
+}) {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-6 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 sm:flex-row">
@@ -227,6 +248,125 @@ function ProfileView({ data }: { data: CharacterProfile }) {
           )}
         </div>
       </div>
+
+      {progression === null ? (
+        <ProgressionSkeleton />
+      ) : (
+        <ProgressionSections progression={progression} />
+      )}
+    </div>
+  );
+}
+
+function ProgressionSkeleton() {
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="h-32 animate-pulse rounded-2xl border border-[var(--border)] bg-[var(--card)]" />
+    </div>
+  );
+}
+
+function formatDuration(ms: number): string {
+  const totalSec = Math.floor(ms / 1000);
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
+
+function ProgressionSections({ progression }: { progression: CharacterProgression }) {
+  return (
+    <div className="flex flex-col gap-6">
+      {progression.achievements && (
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6">
+          <div className="flex items-center justify-between">
+            <h3 className="font-mono text-xs uppercase tracking-widest text-[var(--muted)]">
+              Hauts faits
+            </h3>
+            <span className="font-mono text-sm tabular-nums text-[var(--accent)]">
+              {progression.achievements.totalPoints.toLocaleString("fr-FR")} pts ·{" "}
+              {progression.achievements.totalQuantity} complétés
+            </span>
+          </div>
+          {progression.achievements.recent.length === 0 ? (
+            <p className="mt-4 text-sm text-[var(--muted)]">Aucun haut fait récent.</p>
+          ) : (
+            <ul className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {progression.achievements.recent.map((a, i) => (
+                <li key={i} className="flex items-center justify-between text-sm">
+                  <span>{a.name}</span>
+                  <span className="font-mono text-xs text-[var(--muted)]">
+                    {a.completedAt ? new Date(a.completedAt).toLocaleDateString("fr-FR") : "—"}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {progression.mythicPlus && (
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6">
+          <h3 className="mb-4 font-mono text-xs uppercase tracking-widest text-[var(--muted)]">
+            Mythic+ · saison {progression.mythicPlus.seasonId ?? "?"}
+          </h3>
+          {progression.mythicPlus.bestRuns.length === 0 ? (
+            <p className="text-sm text-[var(--muted)]">
+              Aucune clé enregistrée pour cette saison.
+            </p>
+          ) : (
+            <ul className="divide-y divide-[var(--border)]">
+              {progression.mythicPlus.bestRuns.map((run, i) => (
+                <li key={i} className="py-3 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">{run.dungeonName}</span>
+                    <span className="flex items-center gap-3">
+                      <span className="font-mono tabular-nums text-[var(--accent)]">
+                        +{run.keystoneLevel}
+                      </span>
+                      {run.completedWithinTime ? (
+                        <span className="font-mono text-[10px] uppercase tracking-widest text-emerald-300">
+                          dans le temps
+                        </span>
+                      ) : (
+                        <span className="font-mono text-[10px] uppercase tracking-widest text-amber-300">
+                          hors temps
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                  <div className="mt-1 flex items-center gap-3 text-xs text-[var(--muted)]">
+                    <span className="tabular-nums">{formatDuration(run.duration)}</span>
+                    <span>{new Date(run.completedAt).toLocaleDateString("fr-FR")}</span>
+                    {run.affixes.length > 0 && (
+                      <span className="text-[var(--muted)]">· {run.affixes.join(", ")}</span>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {progression.statistics && progression.statistics.length > 0 && (
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6">
+          <h3 className="mb-4 font-mono text-xs uppercase tracking-widest text-[var(--muted)]">
+            Statistiques notables
+          </h3>
+          <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {progression.statistics
+              .slice()
+              .sort((a, b) => b.quantity - a.quantity)
+              .slice(0, 24)
+              .map((s, i) => (
+                <li key={i} className="flex items-center justify-between text-sm">
+                  <span className="truncate pr-2 text-[var(--muted)]">{s.name}</span>
+                  <span className="font-mono tabular-nums">{s.quantity.toLocaleString("fr-FR")}</span>
+                </li>
+              ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }

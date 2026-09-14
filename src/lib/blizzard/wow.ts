@@ -3,13 +3,18 @@ import "server-only";
 import { blizzardGet, BlizzardApiError, namespaceFor } from "./client";
 import { type Locale, type Region } from "./regions";
 import type {
+  CharacterAchievementsStatistics,
+  CharacterAchievementsSummary,
   CharacterEquipmentSummary,
   CharacterMediaSummary,
   CharacterProfile,
   CharacterProfileSummary,
+  CharacterProgression,
   CharacterStatus,
   ConnectedRealm,
   ConnectedRealmsIndex,
+  MythicKeystoneProfileIndex,
+  MythicKeystoneSeasonDetails,
 } from "./types";
 
 export async function getConnectedRealmsIndex(region: Parameters<typeof blizzardGet>[0]["region"]): Promise<{
@@ -148,4 +153,101 @@ export async function getCharacterProfile(
         }))
       : [],
   };
+}
+
+export async function getCharacterProgression(
+  region: Region,
+  realmInput: string,
+  nameInput: string
+): Promise<CharacterProgression> {
+  const realm = normalizeRealm(realmInput);
+  const name = normalizeName(nameInput);
+  const empty: CharacterProgression = {
+    achievements: null,
+    statistics: null,
+    mythicPlus: null,
+  };
+  if (!realm || !name) return empty;
+
+  const ns = namespaceFor(region, "profile");
+  const base = `/profile/wow/character/${encodeURIComponent(realm)}/${encodeURIComponent(name)}`;
+
+  const [achRes, statsRes, mplusRes] = await Promise.allSettled([
+    blizzardGet<CharacterAchievementsSummary>({ region, namespace: ns, path: `${base}/achievements`, revalidate: 60 }),
+    blizzardGet<CharacterAchievementsStatistics>({
+      region,
+      namespace: ns,
+      path: `${base}/achievements/statistics`,
+      revalidate: 60,
+    }),
+    blizzardGet<MythicKeystoneProfileIndex>({
+      region,
+      namespace: ns,
+      path: `${base}/mythic-keystone-profile`,
+      revalidate: 60,
+    }),
+  ]);
+
+  const achievements =
+    achRes.status === "fulfilled"
+      ? {
+          totalQuantity: achRes.value.total_quantity,
+          totalPoints: achRes.value.total_points,
+          recent: achRes.value.achievements
+            .filter((a) => a.completed_timestamp || a.criteria?.is_completed)
+            .sort((a, b) => (b.completed_timestamp ?? 0) - (a.completed_timestamp ?? 0))
+            .slice(0, 12)
+            .map((a) => ({
+              name: pickLocal(a.achievement.name, String(a.achievement.id)),
+              completedAt: a.completed_timestamp ?? null,
+            })),
+        }
+      : null;
+
+  const statistics =
+    statsRes.status === "fulfilled"
+      ? statsRes.value.statistics.flatMap((cat) =>
+          cat.statistics
+            .filter((s) => s.quantity > 0)
+            .map((s) => ({
+              category: pickLocal(cat.name, String(cat.id)),
+              name: pickLocal(s.name, String(s.id)),
+              quantity: s.quantity,
+            }))
+        )
+      : null;
+
+  let mythicPlus: CharacterProgression["mythicPlus"] = null;
+  if (mplusRes.status === "fulfilled") {
+    const idx = mplusRes.value;
+    const seasonId = idx.current_season?.id ?? null;
+    if (seasonId !== null) {
+      try {
+        const season = await blizzardGet<MythicKeystoneSeasonDetails>({
+          region,
+          namespace: ns,
+          path: `${base}/mythic-keystone-profile/season/${seasonId}`,
+          revalidate: 60,
+        });
+        mythicPlus = {
+          seasonId,
+          bestRuns: season.best_runs.map((r) => ({
+            dungeonName: pickLocal(r.dungeon.name, String(r.dungeon.id)),
+            keystoneLevel: r.keystone_level,
+            duration: r.duration,
+            completedWithinTime: r.is_completed_within_time,
+            completedAt: r.completed_timestamp,
+            affixes: r.keystone_affixes.map((a) => pickLocal(a.name, String(a.id))),
+            score: r.map_rating?.value ?? null,
+          })),
+        };
+      } catch {
+        mythicPlus = { seasonId, bestRuns: [] };
+      }
+    } else {
+      mythicPlus = { seasonId: null, bestRuns: [] };
+    }
+  }
+
+  return { achievements, statistics, mythicPlus };
 }
