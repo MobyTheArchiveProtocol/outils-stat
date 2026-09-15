@@ -1,21 +1,35 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0a0a0a;
-  --foreground: #ededed;
-  --accent: #6ee7b7;
-  --muted: #71717a;
-  --card: #111113;
-  --border: #232327;
+  --background: #060912;
+  --background-2: #080d18;
+  --foreground: #e6edf6;
+  --foreground-frost: #f0f7ff;
+  --accent: #7dd3fc;
+  --accent-deep: #38bdf8;
+  --accent-saronite: #818cf8;
+  --muted: #5b6b82;
+  --card: #0a1320;
+  --card-frost: #0d1a2b;
+  --border: #16243a;
+  --border-frost: #1e3a5f;
+  --glow: rgba(125, 211, 252, 0.16);
+  --glow-soft: rgba(56, 189, 248, 0.08);
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-background-2: var(--background-2);
   --color-foreground: var(--foreground);
+  --color-foreground-frost: var(--foreground-frost);
   --color-accent: var(--accent);
+  --color-accent-deep: var(--accent-deep);
+  --color-accent-saronite: var(--accent-saronite);
   --color-muted: var(--muted);
   --color-card: var(--card);
+  --color-card-frost: var(--card-frost);
   --color-border: var(--border);
+  --color-border-frost: var(--border-frost);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -25,8 +39,106 @@ html {
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, var(--glow-soft), transparent 70%),
+    radial-gradient(circle at 50% 0%, rgba(129, 140, 248, 0.05), transparent 60%);
+  background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+  .frost-card {
+    position: relative;
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .frost-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(180deg, rgba(125, 211, 252, 0.35), transparent 40%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0.5;
+    transition: opacity 0.2s ease;
+  }
+  .frost-card:hover {
+    border-color: var(--border-frost);
+    box-shadow: 0 0 0 1px var(--glow), 0 8px 30px -12px var(--glow);
+  }
+  .frost-card:hover::before {
+    opacity: 1;
+  }
+  .frost-input {
+    height: 2.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border);
+    background-color: var(--card-frost);
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    font-size: 0.875rem;
+    color: var(--foreground);
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .frost-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--glow-soft);
+  }
+  .frost-button {
+    height: 2.5rem;
+    border-radius: 9999px;
+    background-image: linear-gradient(180deg, var(--accent), var(--accent-deep));
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #05101e;
+    transition: filter 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: 0 0 24px -8px var(--glow);
+  }
+  .frost-button:hover {
+    filter: brightness(1.05);
+    box-shadow: 0 0 32px -6px var(--glow);
+  }
+  .frost-button:disabled {
+    opacity: 0.5;
+    box-shadow: none;
+  }
+  .frost-link {
+    transition: color 0.15s ease;
+  }
+  .frost-link:hover {
+    color: var(--accent);
+  }
+}
+
+::selection {
+  background: rgba(125, 211, 252, 0.3);
+  color: var(--foreground-frost);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-frost);
+  border-radius: 9999px;
+  border: 2px solid var(--background);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-deep);
 }

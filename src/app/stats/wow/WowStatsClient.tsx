@@ -49,13 +49,14 @@ export default function WowStatsClient({ initialRegion }: { initialRegion: Regio
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">World of Warcraft</h1>
+          <span className="font-mono text-xs uppercase tracking-[0.3em] text-[var(--accent)]">❄ Norfendre</span>
+          <h1 className="mt-2 text-3xl font-semibold uppercase tracking-tight text-[var(--foreground-frost)]">World of Warcraft</h1>
           <p className="mt-1 text-sm text-[var(--muted)]">
             Statut des royaumes connectés · source Battle.net API
           </p>
           <Link
             href="/stats/wow/character"
-            className="mt-2 inline-block font-mono text-xs text-[var(--foreground)] underline-offset-4 hover:underline"
+            className="mt-2 inline-block font-mono text-xs text-[var(--accent)] underline-offset-4 hover:underline"
           >
             rechercher un personnage →
           </Link>
@@ -68,7 +69,7 @@ export default function WowStatsClient({ initialRegion }: { initialRegion: Regio
             id="region"
             value={region}
             onChange={(e) => setRegion(e.target.value as Region)}
-            className="h-10 rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 font-mono text-sm text-[var(--foreground)] outline-none focus:border-[var(--accent)]"
+            className="frost-input font-mono"
           >
             {REGIONS.map((r) => (
               <option key={r} value={r}>
@@ -79,7 +80,7 @@ export default function WowStatsClient({ initialRegion }: { initialRegion: Regio
           <button
             type="button"
             onClick={handleRefresh}
-            className="h-10 rounded-lg border border-[var(--border)] px-3 font-mono text-xs uppercase tracking-widest text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"
+            className="h-10 rounded-lg border border-[var(--border)] px-3 font-mono text-xs uppercase tracking-widest text-[var(--muted)] transition-colors hover:border-[var(--border-frost)] hover:text-[var(--foreground)]"
           >
             refresh
           </button>
@@ -97,7 +98,7 @@ function LoadingState() {
   return (
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="h-28 animate-pulse rounded-2xl border border-[var(--border)] bg-[var(--card)]" />
+        <div key={i} className="h-28 animate-pulse frost-card" />
       ))}
     </div>
   );
@@ -130,7 +131,7 @@ const POP_LABELS: Record<string, string> = {
 
 function StatCard({ label, value, hint }: { label: string; value: string | number; hint?: string }) {
   return (
-    <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5">
+    <div className="frost-card p-5">
       <p className="font-mono text-xs uppercase tracking-widest text-[var(--muted)]">{label}</p>
       <p className="mt-2 text-3xl font-semibold tabular-nums">{value}</p>
       {hint && <p className="mt-1 text-xs text-[var(--muted)]">{hint}</p>}
@@ -157,7 +158,7 @@ function StatsView({ data }: { data: RegionStat }) {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6">
+        <div className="frost-card p-6">
           <h2 className="mb-4 font-mono text-xs uppercase tracking-widest text-[var(--muted)]">
             Par statut
           </h2>
@@ -179,7 +180,7 @@ function StatsView({ data }: { data: RegionStat }) {
           </ul>
         </div>
 
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6">
+        <div className="frost-card p-6">
           <h2 className="mb-4 font-mono text-xs uppercase tracking-widest text-[var(--muted)]">
             Par population
           </h2>
@@ -192,7 +193,7 @@ function StatsView({ data }: { data: RegionStat }) {
                 </div>
                 <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--border)]">
                   <div
-                    className="h-full rounded-full bg-[var(--foreground)]"
+                    className="h-full rounded-full bg-gradient-to-r from-[var(--accent-deep)] to-[var(--accent)]"
                     style={{ width: `${(value / maxPop) * 100}%` }}
                   />
                 </div>
@@ -202,7 +203,7 @@ function StatsView({ data }: { data: RegionStat }) {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6">
+      <div className="frost-card p-6">
         <h2 className="mb-4 font-mono text-xs uppercase tracking-widest text-[var(--muted)]">
           Royaumes d’attention
         </h2>

@@ -13,14 +13,14 @@ type State =
   | { status: "success"; data: CharacterProfile; progression: CharacterProgression | null; details: CharacterDetails | null };
 
 const QUALITY_COLORS: Record<string, string> = {
-  POOR: "#9d9d9d",
-  COMMON: "#ffffff",
-  UNCOMMON: "#1eff00",
-  RARE: "#0070dd",
-  EPIC: "#a335ee",
-  LEGENDARY: "#ff8000",
-  ARTIFACT: "#e6cc80",
-  HEIRLOOM: "#00ccff",
+  POOR: "#8a96a8",
+  COMMON: "#e6edf6",
+  UNCOMMON: "#5ade8a",
+  RARE: "#38bdf8",
+  EPIC: "#a78bfa",
+  LEGENDARY: "#fbbf24",
+  ARTIFACT: "#fcd34d",
+  HEIRLOOM: "#7dd3fc",
 };
 
 export default function CharacterSearch() {
@@ -91,7 +91,8 @@ export default function CharacterSearch() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Personnage WoW</h1>
+        <span className="font-mono text-xs uppercase tracking-[0.3em] text-[var(--accent)]">❄ Norfendre</span>
+        <h1 className="mt-2 text-3xl font-semibold uppercase tracking-tight text-[var(--foreground-frost)]">Personnage WoW</h1>
         <p className="mt-1 text-sm text-[var(--muted)]">
           Recherchez un personnage par royaume et nom · source Battle.net Profile API
         </p>
@@ -112,7 +113,7 @@ export default function CharacterSearch() {
             id="region"
             value={region}
             onChange={(e) => setRegion(e.target.value as Region)}
-            className="h-10 rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 font-mono text-sm text-[var(--foreground)] outline-none focus:border-[var(--accent)]"
+            className="frost-input font-mono"
           >
             {REGIONS.map((r) => (
               <option key={r} value={r}>
@@ -130,7 +131,7 @@ export default function CharacterSearch() {
             value={realm}
             onChange={(e) => setRealm(e.target.value)}
             placeholder="ex : hyjal, draenor, tarren-mill"
-            className="h-10 rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-[var(--accent)]"
+            className="frost-input"
           />
         </div>
         <div className="flex flex-1 flex-col gap-1.5">
@@ -142,20 +143,16 @@ export default function CharacterSearch() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="ex : varian"
-            className="h-10 rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-[var(--accent)]"
+            className="frost-input"
           />
         </div>
-        <button
-          type="submit"
-          disabled={state.status === "loading"}
-          className="h-10 rounded-full bg-[var(--foreground)] px-6 text-sm font-medium text-[var(--background)] transition-opacity hover:opacity-90 disabled:opacity-50"
-        >
-          {state.status === "loading" ? "..." : "Chercher"}
+        <button type="submit" disabled={state.status === "loading"} className="frost-button">
+          {state.status === "loading" ? "..." : "❄ Chercher"}
         </button>
       </form>
 
       {state.status === "loading" && (
-        <div className="h-64 animate-pulse rounded-2xl border border-[var(--border)] bg-[var(--card)]" />
+        <div className="h-64 animate-pulse rounded-2xl border border-[var(--border)] bg-[var(--card-frost)]" />
       )}
 
       {state.status === "error" && (
@@ -183,7 +180,7 @@ function StatRow({ label, value }: { label: string; value: string | number | nul
   return (
     <div className="flex items-center justify-between border-b border-[var(--border)] py-2.5 text-sm">
       <span className="text-[var(--muted)]">{label}</span>
-      <span className="font-medium tabular-nums">{value ?? "—"}</span>
+      <span className="font-medium tabular-nums text-[var(--foreground-frost)]">{value ?? "—"}</span>
     </div>
   );
 }
@@ -199,14 +196,14 @@ function ProfileView({
 }) {
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-6 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 sm:flex-row">
+      <div className="flex flex-col gap-6 frost-card p-6 sm:flex-row">
         {data.avatarUrl && (
           <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl border border-[var(--border)] bg-black/30">
             <Image src={data.avatarUrl} alt={data.name} fill sizes="96px" className="object-cover" unoptimized />
           </div>
         )}
         <div className="flex flex-col gap-1">
-          <h2 className="text-2xl font-semibold tracking-tight">
+          <h2 className="text-2xl font-semibold uppercase tracking-tight text-[var(--foreground-frost)]">
             {data.name}
             {!data.isValid && (
               <span className="ml-2 font-mono text-xs uppercase tracking-widest text-amber-300">
@@ -222,13 +219,13 @@ function ProfileView({
             {data.region.toUpperCase()} {data.factionName && `· ${data.factionName}`}
           </p>
           {data.guildName && (
-            <p className="text-sm text-[var(--accent)]">⟨ {data.guildName} ⟩</p>
+            <p className="text-sm text-[var(--accent-saronite)]">⟨ {data.guildName} ⟩</p>
           )}
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6">
+        <div className="frost-card p-6">
           <h3 className="mb-2 font-mono text-xs uppercase tracking-widest text-[var(--muted)]">
             Aperçu
           </h3>
@@ -243,7 +240,7 @@ function ProfileView({
           <StatRow label="Guilde" value={data.guildName ?? "—"} />
         </div>
 
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6">
+        <div className="frost-card p-6">
           <h3 className="mb-2 font-mono text-xs uppercase tracking-widest text-[var(--muted)]">
             Équipement
           </h3>
@@ -281,7 +278,7 @@ function ProfileView({
 function ProgressionSkeleton() {
   return (
     <div className="flex flex-col gap-6">
-      <div className="h-32 animate-pulse rounded-2xl border border-[var(--border)] bg-[var(--card)]" />
+      <div className="h-32 animate-pulse rounded-2xl border border-[var(--border)] bg-[var(--card-frost)]" />
     </div>
   );
 }
@@ -297,7 +294,7 @@ function ProgressionSections({ progression }: { progression: CharacterProgressio
   return (
     <div className="flex flex-col gap-6">
       {progression.achievements && (
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6">
+        <div className="frost-card p-6">
           <div className="flex items-center justify-between">
             <h3 className="font-mono text-xs uppercase tracking-widest text-[var(--muted)]">
               Hauts faits
@@ -325,7 +322,7 @@ function ProgressionSections({ progression }: { progression: CharacterProgressio
       )}
 
       {progression.mythicPlus && (
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6">
+        <div className="frost-card p-6">
           <h3 className="mb-4 font-mono text-xs uppercase tracking-widest text-[var(--muted)]">
             Mythic+ · saison {progression.mythicPlus.seasonId ?? "?"}
           </h3>
@@ -369,7 +366,7 @@ function ProgressionSections({ progression }: { progression: CharacterProgressio
       )}
 
       {progression.statistics && progression.statistics.length > 0 && (
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6">
+        <div className="frost-card p-6">
           <h3 className="mb-4 font-mono text-xs uppercase tracking-widest text-[var(--muted)]">
             Statistiques notables
           </h3>
@@ -403,7 +400,7 @@ function Section({
   empty?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6">
+    <div className="frost-card p-6">
       <div className="flex items-center justify-between">
         <h3 className="font-mono text-xs uppercase tracking-widest text-[var(--muted)]">{title}</h3>
         {right}

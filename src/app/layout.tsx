@@ -33,29 +33,32 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="fr" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-        <header className="border-b border-[var(--border)]">
+        <header className="relative border-b border-[var(--border)]">
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[var(--accent)]/40 to-transparent" />
           <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-4">
-            <Link href="/" className="font-mono text-sm tracking-tight text-[var(--foreground)]">
-              outils-stat
+            <Link href="/" className="group relative font-mono text-sm tracking-tight text-[var(--foreground)]">
+              <span className="pointer-events-none absolute -inset-x-3 -inset-y-1 rounded-full bg-[var(--accent)]/0 blur-md transition-colors duration-300 group-hover:bg-[var(--accent)]/10" />
+              <span className="relative">❄ outils-stat</span>
             </Link>
             <nav className="flex items-center gap-6 text-sm text-[var(--muted)]">
-              <Link href="/stats/wow" className="transition-colors hover:text-[var(--foreground)]">
+              <Link href="/stats/wow" className="frost-link">
                 WoW
               </Link>
-              <Link href="/stats/wow/character" className="transition-colors hover:text-[var(--foreground)]">
+              <Link href="/stats/wow/character" className="frost-link">
                 Personnage
               </Link>
-              <Link href="/a-propos" className="transition-colors hover:text-[var(--foreground)]">
+              <Link href="/a-propos" className="frost-link">
                 À propos
               </Link>
             </nav>
             <AccountWidget />
           </div>
         </header>
-        <main className="flex flex-1 flex-col">{children}</main>
-        <footer className="border-t border-[var(--border)]">
+        <main className="relative flex flex-1 flex-col">{children}</main>
+        <footer className="relative border-t border-[var(--border)]">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[var(--accent)]/30 to-transparent" />
           <div className="mx-auto w-full max-w-5xl px-6 py-6 text-xs text-[var(--muted)]">
-            Data Blizzard © Blizzard Entertainment · Pas de pub, pas de tracking. Juste de la data.
+            ❄ Data Blizzard © Blizzard Entertainment · Pas de pub, pas de tracking. Juste de la data.
           </div>
         </footer>
       </body>

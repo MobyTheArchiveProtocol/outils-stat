@@ -17,10 +17,10 @@ export default function Home() {
   return (
     <div className="mx-auto w-full max-w-5xl flex-1 px-6 py-20">
       <section className="flex flex-col gap-6 pb-20">
-        <span className="font-mono text-xs uppercase tracking-widest text-[var(--accent)]">
-          data de jeu · sans bruit
+        <span className="font-mono text-xs uppercase tracking-[0.3em] text-[var(--accent)]">
+          ❄ data de jeu · sans bruit
         </span>
-        <h1 className="max-w-2xl text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
+        <h1 className="max-w-2xl text-4xl font-semibold uppercase leading-tight tracking-tight text-[var(--foreground-frost)] sm:text-5xl">
           Les stats de vos jeux, comme à l’époque. Proprement.
         </h1>
         <p className="max-w-xl text-lg leading-relaxed text-[var(--muted)]">
@@ -28,15 +28,12 @@ export default function Home() {
           de vos jeux, présentée clairement. On commence par Blizzard.
         </p>
         <div className="flex flex-wrap gap-3 pt-2">
-          <Link
-            href="/stats/wow"
-            className="inline-flex h-11 items-center justify-center rounded-full bg-[var(--foreground)] px-6 text-sm font-medium text-[var(--background)] transition-opacity hover:opacity-90"
-          >
+          <Link href="/stats/wow" className="frost-button inline-flex items-center justify-center">
             Voir les stats WoW
           </Link>
           <Link
             href="/a-propos"
-            className="inline-flex h-11 items-center justify-center rounded-full border border-[var(--border)] px-6 text-sm font-medium transition-colors hover:border-[var(--muted)]"
+            className="inline-flex h-11 items-center justify-center rounded-full border border-[var(--border)] px-6 text-sm font-medium transition-colors hover:border-[var(--border-frost)] hover:text-[var(--foreground)]"
           >
             Le concept
           </Link>
@@ -56,20 +53,17 @@ export default function Home() {
         </h2>
         <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {games.map((g) => (
-            <li
-              key={g.slug}
-              className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 transition-colors hover:border-[var(--muted)]"
-            >
+            <li key={g.slug} className="frost-card p-6">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-medium">{g.name}</h3>
+                <h3 className="text-lg font-medium text-[var(--foreground-frost)]">{g.name}</h3>
                 <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--accent)]">
-                  dispo
+                  ❄ dispo
                 </span>
               </div>
               <p className="mt-2 text-sm text-[var(--muted)]">{g.blurb}</p>
               <Link
                 href={`/stats/${g.slug}`}
-                className="mt-4 inline-block font-mono text-xs text-[var(--foreground)] underline-offset-4 hover:underline"
+                className="mt-4 inline-block font-mono text-xs text-[var(--accent)] underline-offset-4 hover:underline"
               >
                 ouvrir →
               </Link>
