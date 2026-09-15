@@ -1,186 +1,385 @@
 @import "tailwindcss";
 
+/*
+  Manuscript design system — "Chroniques de data"
+  The page is a darkened scribe's chamber. The content is an illuminated
+  parchment page laid within it. No SaaS cards, no centered max-width slab,
+  no rounded glass panels. Instead: ink-on-parchment ledgers, dotted-leader
+  rows, drop caps, gold-leaf rules and corner ornaments.
+*/
+
 :root {
-  --background: #07060a;
-  --background-2: #0c0a10;
-  --foreground: #d8cbb0;
-  --foreground-bright: #f2e6c9;
-  --gold: #c9a227;
-  --gold-bright: #e8c661;
-  --gold-dim: #8a6d1a;
-  --blood: #8a1f1f;
-  --blood-bright: #b8322f;
-  --parchment: #e8dcc0;
-  --muted: #6b5d44;
-  --card: #100c14;
-  --card-2: #15101a;
-  --border: #3a2f1a;
-  --border-gold: #5a4a22;
+  --chamber: #15110b;
+  --chamber-2: #1c160e;
+  --chamber-edge: #2a2114;
+
+  --parchment: #e7d9b8;
+  --parchment-2: #ddcba6;
+  --parchment-edge: #c9b687;
+  --parchment-shadow: #b09a6a;
+
+  --ink: #221a0f;
+  --ink-soft: #4a3c24;
+  --ink-faded: #7a6a48;
+  --ink-mute: #9a8a64;
+
+  --gold: #b8892b;
+  --gold-bright: #e3b34f;
+  --gold-leaf: #f0cd6c;
+  --gold-deep: #7a5a16;
+
+  --blood: #6e1f17;
+  --blood-bright: #9a3122;
+
+  --wax: #8a2a1f;
+  --seal: #a8331f;
+
+  --rune: #2f6f5a;
+
+  --font-display: var(--font-cinzel);
+  --font-body: var(--font-ebgaramond);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-background-2: var(--background-2);
-  --color-foreground: var(--foreground);
-  --color-foreground-bright: var(--foreground-bright);
+  --color-chamber: var(--chamber);
+  --color-chamber-2: var(--chamber-2);
+  --color-chamber-edge: var(--chamber-edge);
+  --color-parchment: var(--parchment);
+  --color-parchment-2: var(--parchment-2);
+  --color-parchment-edge: var(--parchment-edge);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faded: var(--ink-faded);
+  --color-ink-mute: var(--ink-mute);
   --color-gold: var(--gold);
   --color-gold-bright: var(--gold-bright);
-  --color-gold-dim: var(--gold-dim);
+  --color-gold-leaf: var(--gold-leaf);
+  --color-gold-deep: var(--gold-deep);
   --color-blood: var(--blood);
   --color-blood-bright: var(--blood-bright);
-  --color-parchment: var(--parchment);
-  --color-muted: var(--muted);
-  --color-card: var(--card);
-  --color-card-2: var(--card-2);
-  --color-border: var(--border);
-  --color-border-gold: var(--border-gold);
+  --color-wax: var(--wax);
+  --color-seal: var(--seal);
+  --color-rune: var(--rune);
   --font-display: var(--font-cinzel);
   --font-body: var(--font-ebgaramond);
 }
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
-  background-color: var(--background);
+  background-color: var(--chamber);
   background-image:
-    radial-gradient(ellipse 70% 40% at 50% 0%, rgba(138, 31, 31, 0.10), transparent 60%),
-    radial-gradient(circle at 50% 0%, rgba(201, 162, 39, 0.05), transparent 70%);
+    radial-gradient(ellipse 90% 60% at 50% -10%, rgba(184, 137, 43, 0.10), transparent 55%),
+    radial-gradient(ellipse 60% 50% at 50% 110%, rgba(110, 31, 23, 0.10), transparent 55%);
   background-attachment: fixed;
-  color: var(--foreground);
+  color: var(--ink);
   font-family: var(--font-body), Georgia, "Times New Roman", serif;
   -webkit-font-smoothing: antialiased;
 }
 
-@layer components {
-  .h1 {
-    font-family: var(--font-display), serif;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    color: var(--foreground-bright);
-  }
-  .h1::first-letter {
-    color: var(--gold-bright);
-  }
-  .plate {
-    position: relative;
-    background-color: var(--card);
-    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent 30%);
-    border: 1px solid var(--border-gold);
-    border-radius: 0.25rem;
-    box-shadow: inset 0 0 0 1px rgba(201, 162, 39, 0.12), inset 0 1px 0 rgba(201, 162, 39, 0.05);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  }
-  .plate:hover {
-    border-color: var(--gold);
-    box-shadow: inset 0 0 0 1px rgba(201, 162, 39, 0.22), 0 0 18px -6px rgba(201, 162, 39, 0.25);
-  }
-  .plate-frame {
-    position: relative;
-    background-color: var(--card);
-    border: 2px solid var(--border-gold);
-    border-radius: 0.25rem;
-    box-shadow: inset 0 0 0 1px rgba(7, 6, 10, 0.8), inset 0 0 0 2px rgba(201, 162, 39, 0.15);
-  }
-  .field {
-    height: 2.5rem;
-    border-radius: 0.25rem;
-    border: 1px solid var(--border);
-    background-color: var(--background-2);
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
-    font-size: 0.95rem;
-    color: var(--foreground-bright);
-    outline: none;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
-    font-family: var(--font-body), Georgia, serif;
-  }
-  .field:focus {
-    border-color: var(--gold);
-    box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.18);
-  }
-  .btn-gold {
-    height: 2.5rem;
-    border-radius: 0.25rem;
-    background-image: linear-gradient(180deg, var(--gold-bright), var(--gold) 60%, var(--gold-dim));
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-    font-family: var(--font-display), serif;
-    font-size: 0.85rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    color: #1a1208;
-    border: 1px solid var(--gold-dim);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 2px 6px rgba(0, 0, 0, 0.4);
-    transition: filter 0.15s ease;
-  }
-  .btn-gold:hover {
-    filter: brightness(1.08);
-  }
-  .btn-gold:disabled {
-    opacity: 0.5;
-  }
-  .btn-ghost {
-    height: 2.75rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 0.25rem;
-    border: 1px solid var(--border-gold);
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-    font-family: var(--font-display), serif;
-    font-size: 0.85rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    color: var(--foreground-bright);
-    background-color: rgba(201, 162, 39, 0.04);
-    transition: border-color 0.15s ease, background-color 0.15s ease;
-  }
-  .btn-ghost:hover {
-    border-color: var(--gold);
-    background-color: rgba(201, 162, 39, 0.1);
-  }
-  .glyph-sep {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    color: var(--gold-dim);
-  }
-  .glyph-sep::before,
-  .glyph-sep::after {
-    content: "";
-    height: 1px;
-    flex: 1;
-    background: linear-gradient(90deg, transparent, var(--border-gold), transparent);
-  }
-  .eyebrow {
-    font-family: var(--font-display), serif;
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: var(--gold-bright);
-  }
-  .label {
-    font-family: var(--font-display), serif;
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-  .stat-num {
-    font-family: var(--font-display), serif;
-    font-variant-numeric: tabular-nums;
-  }
+/* ── Parchment page ────────────────────────────────────────────── */
+
+.manuscript {
+  position: relative;
+  background-color: var(--parchment);
+  background-image:
+    radial-gradient(ellipse 70% 50% at 20% 0%, rgba(240, 205, 108, 0.22), transparent 60%),
+    radial-gradient(ellipse 60% 45% at 85% 100%, rgba(176, 154, 106, 0.20), transparent 60%),
+    repeating-linear-gradient(0deg, rgba(122, 106, 72, 0.045) 0px, transparent 2px, transparent 6px),
+    repeating-linear-gradient(90deg, rgba(122, 106, 72, 0.03) 0px, transparent 1px, transparent 5px);
+  box-shadow:
+    0 0 0 1px var(--parchment-edge),
+    0 2px 0 0 rgba(0, 0, 0, 0.2),
+    0 30px 60px -30px rgba(0, 0, 0, 0.7);
+}
+
+.gilt-frame {
+  position: relative;
+  padding: clamp(1.75rem, 4vw, 3.5rem);
+}
+.gilt-frame::before {
+  content: "";
+  position: absolute;
+  inset: clamp(0.875rem, 2vw, 1.75rem);
+  pointer-events: none;
+  border: 1px double var(--gold);
+  opacity: 0.55;
+}
+
+/* Corner ornaments (gold leaf curls) */
+.ornament-corners {
+  position: relative;
+}
+.ornament-corners::before,
+.ornament-corners::after {
+  content: "❧";
+  position: absolute;
+  pointer-events: none;
+  color: var(--gold-deep);
+  font-size: 1.4rem;
+  opacity: 0.7;
+}
+.ornament-corners::before {
+  top: clamp(0.5rem, 1.2vw, 0.9rem);
+  left: clamp(0.5rem, 1.2vw, 0.9rem);
+  transform: rotate(0deg);
+}
+.ornament-corners::after {
+  bottom: clamp(0.5rem, 1.2vw, 0.9rem);
+  right: clamp(0.5rem, 1.2vw, 0.9rem);
+  transform: scaleX(-1);
+}
+
+/* ── Typography ─────────────────────────────────────────────────── */
+
+.h-chronicle {
+  font-family: var(--font-display), serif;
+  font-weight: 700;
+  letter-spacing: 0.015em;
+  color: var(--ink);
+  line-height: 1.05;
+}
+
+.chap-label {
+  font-family: var(--font-display), serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+}
+
+.ledger-label {
+  font-family: var(--font-display), serif;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-faded);
+}
+
+.num {
+  font-family: var(--font-display), serif;
+  font-variant-numeric: tabular-nums lining-nums;
+  font-weight: 600;
+}
+
+.dropcap::first-letter {
+  font-family: var(--font-display), serif;
+  font-weight: 700;
+  font-size: 3.4em;
+  line-height: 0.82;
+  float: left;
+  padding: 0.08em 0.12em 0 0;
+  color: var(--blood);
+  text-shadow: 1px 1px 0 rgba(122, 90, 22, 0.25);
+}
+
+/* ── Ink rules & separators ─────────────────────────────────────── */
+
+.gilt-rule {
+  height: 1px;
+  border: 0;
+  background-image: linear-gradient(
+    to right,
+    transparent,
+    var(--gold-deep) 8%,
+    var(--gold-bright) 50%,
+    var(--gold-deep) 92%,
+    transparent
+  );
+  margin: 0;
+}
+.gilt-rule-double {
+  border: 0;
+  height: 5px;
+  background-image:
+    linear-gradient(to bottom, var(--gold-deep), var(--gold-deep)),
+    linear-gradient(to bottom, var(--gold-deep), var(--gold-deep));
+  background-size: 100% 1px, 100% 1px;
+  background-position: 0 0, 0 100%;
+  background-repeat: no-repeat;
+}
+.rule-ink {
+  height: 1px;
+  border: 0;
+  background-color: var(--ink-mute);
+  opacity: 0.45;
+}
+
+.fleuron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  color: var(--gold-deep);
+  font-size: 0.85rem;
+}
+.fleuron::before,
+.fleuron::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background-image: linear-gradient(to right, transparent, var(--gold), transparent);
+}
+
+/* ── Ledger rows (dotted leader, like an index) ─────────────────── */
+
+.ledger-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.42rem 0;
+  border-bottom: 1px dotted var(--ink-mute);
+}
+.ledger-row > .lr-key {
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.ledger-row > .lr-leader {
+  flex: 1;
+  border-bottom: 1px dotted var(--ink-mute);
+  transform: translateY(-0.25em);
+}
+.ledger-row > .lr-val {
+  color: var(--ink);
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* ── Fields & seals ─────────────────────────────────────────────── */
+
+.ink-field {
+  height: 2.6rem;
+  border-radius: 0;
+  border: 1px solid var(--parchment-edge);
+  background-color: rgba(231, 217, 184, 0.5);
+  padding-inline: 0.85rem;
+  font-size: 1rem;
+  color: var(--ink);
+  outline: none;
+  font-family: var(--font-body), Georgia, serif;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.ink-field:focus {
+  border-color: var(--gold-deep);
+  box-shadow: inset 0 0 0 1px rgba(184, 137, 43, 0.4);
+}
+.ink-field::placeholder {
+  color: var(--ink-mute);
+  font-style: italic;
+}
+
+.seal-btn {
+  height: 2.6rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0;
+  background-image: linear-gradient(180deg, var(--gold-leaf), var(--gold) 55%, var(--gold-deep));
+  padding-inline: 1.6rem;
+  font-family: var(--font-display), serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+  border: 1px solid var(--gold-deep);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 2px 5px rgba(0, 0, 0, 0.35);
+  transition: filter 0.15s ease, transform 0.1s ease;
+}
+.seal-btn:hover {
+  filter: brightness(1.06);
+}
+.seal-btn:active {
+  transform: translateY(1px);
+}
+.seal-btn:disabled {
+  opacity: 0.5;
+}
+
+.ghost-btn {
+  height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0;
+  border: 1px solid var(--gold-deep);
+  padding-inline: 1.4rem;
+  font-family: var(--font-display), serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+  background-color: transparent;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.ghost-btn:hover {
+  background-color: var(--gold);
+  color: var(--chamber);
+}
+
+/* ── Wax seal (auth widget) ─────────────────────────────────────── */
+
+.wax {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-display), serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--gold-leaf);
+}
+.wax-link {
+  color: var(--gold-leaf);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--gold);
+  padding-bottom: 1px;
+  transition: color 0.15s ease;
+}
+.wax-link:hover {
+  color: var(--gold-bright);
+}
+
+/* ── Bars (ledger mini-charts) ──────────────────────────────────── */
+
+.ledger-bar-track {
+  height: 0.5rem;
+  background-color: rgba(122, 106, 72, 0.25);
+  border: 1px solid var(--parchment-edge);
+}
+.ledger-bar-fill {
+  height: 100%;
+  background-image: linear-gradient(90deg, var(--blood), var(--gold));
+}
+
+/* ── Misc ink helpers ───────────────────────────────────────────── */
+
+.ink-chamber {
+  color: var(--ink-soft);
+}
+.ink-faded {
+  color: var(--ink-faded);
+}
+.ink-mute {
+  color: var(--ink-mute);
+}
+.gold-text {
+  color: var(--gold-deep);
+}
+
+a {
+  color: inherit;
+}
+a:hover {
+  color: var(--blood);
 }
 
 ::selection {
-  background: rgba(201, 162, 39, 0.3);
-  color: var(--foreground-bright);
+  background: rgba(184, 137, 43, 0.3);
+  color: var(--ink);
 }
 
 ::-webkit-scrollbar {
@@ -188,20 +387,12 @@ body {
   height: 12px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--background);
+  background: var(--chamber);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border-gold);
-  border-radius: 0;
-  border: 2px solid var(--background);
+  background: var(--chamber-edge);
+  border: 2px solid var(--chamber);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--gold);
-}
-
-a {
-  color: inherit;
-}
-a:hover {
-  color: var(--gold-bright);
+  background: var(--gold-deep);
 }

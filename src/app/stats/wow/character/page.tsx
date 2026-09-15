@@ -8,9 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function CharacterPage() {
-  return (
-    <div className="mx-auto w-full max-w-5xl flex-1 px-6 py-12">
-      <CharacterSearch />
-    </div>
-  );
+  return <CharacterSearch />;
 }

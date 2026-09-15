@@ -46,30 +46,30 @@ export default function WowStatsClient({ initialRegion }: { initialRegion: Regio
   };
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+    <article className="manuscript ornament-corners gilt-frame">
+      <header className="flex flex-col gap-3 border-b border-dotted border-[var(--ink-mute)] pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <span className="eyebrow">⚔ Sang &amp; or</span>
-          <h1 className="h1 mt-2 text-3xl uppercase tracking-tight">World of Warcraft</h1>
-          <p className="mt-1 text-sm text-[var(--muted)]">
-            Statut des royaumes connectés · source Battle.net API
+          <p className="chap-label">⚔ Chapitre I</p>
+          <h1 className="h-chronicle mt-2 text-3xl uppercase sm:text-4xl">Royaumes connectés</h1>
+          <p className="mt-1 text-sm italic text-[var(--ink-faded)]">
+            Statut des royaumes World of Warcraft · source Battle.net API
           </p>
           <Link
             href="/stats/wow/character"
-            className="mt-2 inline-block text-xs text-[var(--gold-bright)] underline-offset-4 hover:underline"
+            className="mt-3 inline-block text-sm text-[var(--blood)] underline decoration-dotted underline-offset-4 hover:text-[var(--blood-bright)]"
           >
-            rechercher un personnage →
+            Consulter un personnage →
           </Link>
         </div>
         <div className="flex items-center gap-2">
-          <label htmlFor="region" className="label">
+          <label htmlFor="region" className="ledger-label">
             région
           </label>
           <select
             id="region"
             value={region}
             onChange={(e) => setRegion(e.target.value as Region)}
-            className="field"
+            className="ink-field"
           >
             {REGIONS.map((r) => (
               <option key={r} value={r}>
@@ -77,28 +77,26 @@ export default function WowStatsClient({ initialRegion }: { initialRegion: Regio
               </option>
             ))}
           </select>
-          <button
-            type="button"
-            onClick={handleRefresh}
-            className="btn-ghost h-10 px-3 text-xs"
-          >
-            refresh
+          <button type="button" onClick={handleRefresh} className="ghost-btn h-10 px-3 text-xs">
+            rafraîchir
           </button>
         </div>
-      </div>
+      </header>
 
-      {state.status === "loading" && <LoadingState />}
-      {state.status === "error" && <ErrorState message={state.message} />}
-      {state.status === "success" && <StatsView data={state.data} />}
-    </div>
+      <div className="mt-6">
+        {state.status === "loading" && <LoadingState />}
+        {state.status === "error" && <ErrorState message={state.message} />}
+        {state.status === "success" && <StatsView data={state.data} />}
+      </div>
+    </article>
   );
 }
 
 function LoadingState() {
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+    <div className="flex flex-col gap-3">
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="h-28 animate-pulse plate" />
+        <div key={i} className="h-10 animate-pulse bg-[var(--parchment-2)]/60" />
       ))}
     </div>
   );
@@ -106,10 +104,10 @@ function LoadingState() {
 
 function ErrorState({ message }: { message: string }) {
   return (
-    <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-6">
-      <p className="text-sm text-red-300">Impossible de charger les stats.</p>
-      <p className="mt-2 text-sm text-[var(--muted)]">{message}</p>
-      <p className="mt-3 text-xs text-[var(--muted)]">
+    <div className="border-l-2 border-[var(--blood)] bg-[var(--parchment-2)]/60 px-4 py-3">
+      <p className="text-sm text-[var(--blood)]">Impossible de charger les stats.</p>
+      <p className="mt-2 text-sm text-[var(--ink-faded)]">{message}</p>
+      <p className="mt-2 text-xs text-[var(--ink-mute)]">
         Vérifiez que les credentials Blizzard sont configurés côté serveur.
       </p>
     </div>
@@ -129,16 +127,6 @@ const POP_LABELS: Record<string, string> = {
   LOWEST: "Très faible",
 };
 
-function StatCard({ label, value, hint }: { label: string; value: string | number; hint?: string }) {
-  return (
-    <div className="plate p-5">
-      <p className="label">{label}</p>
-      <p className="stat-num mt-2 text-3xl font-semibold">{value}</p>
-      {hint && <p className="mt-1 text-xs text-[var(--muted)]">{hint}</p>}
-    </div>
-  );
-}
-
 function StatsView({ data }: { data: RegionStat }) {
   const statusEntries = Object.entries(data.byStatus).sort((a, b) => b[1] - a[1]);
   const popEntries = Object.entries(data.byPopulation).sort((a, b) => b[1] - a[1]);
@@ -146,96 +134,101 @@ function StatsView({ data }: { data: RegionStat }) {
   const maxPop = Math.max(...popEntries.map(([, v]) => v), 1);
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatCard label="Royaumes" value={data.total} hint={`région ${data.region.toUpperCase()}`} />
-        <StatCard label="En ligne" value={data.online} />
-        <StatCard label="Avec file" value={data.queued} />
-        <StatCard
-          label="Disponibilité"
-          value={data.total > 0 ? `${Math.round((data.online / data.total) * 100)}%` : "—"}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="plate p-6">
-          <h2 className="label mb-4">
-            Par statut
-          </h2>
-          <ul className="flex flex-col gap-3">
-            {statusEntries.map(([key, value]) => (
-              <li key={key}>
-                <div className="mb-1 flex items-center justify-between text-sm">
-                  <span>{STATUS_LABELS[key] ?? key}</span>
-                  <span className="tabular-nums text-[var(--muted)]">{value}</span>
-                </div>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--border)]">
-                  <div
-                    className="h-full rounded-full bg-[var(--gold)]"
-                    style={{ width: `${(value / maxStatus) * 100}%` }}
-                  />
-                </div>
-              </li>
-            ))}
-          </ul>
+    <div className="flex flex-col gap-10">
+      <section>
+        <h2 className="ledger-label mb-3">État de la région {data.region.toUpperCase()}</h2>
+        <div className="grid grid-cols-1 gap-x-10 gap-y-1 sm:grid-cols-2">
+          <div className="ledger-row">
+            <span className="lr-key">Royaumes dénombrés</span>
+            <span className="lr-leader" />
+            <span className="num lr-val">{data.total}</span>
+          </div>
+          <div className="ledger-row">
+            <span className="lr-key">En ligne</span>
+            <span className="lr-leader" />
+            <span className="num lr-val text-[var(--rune)]">{data.online}</span>
+          </div>
+          <div className="ledger-row">
+            <span className="lr-key">Avec file d’attente</span>
+            <span className="lr-leader" />
+            <span className="num lr-val">{data.queued}</span>
+          </div>
+          <div className="ledger-row">
+            <span className="lr-key">Disponibilité</span>
+            <span className="lr-leader" />
+            <span className="num lr-val">
+              {data.total > 0 ? `${Math.round((data.online / data.total) * 100)}%` : "—"}
+            </span>
+          </div>
         </div>
+      </section>
 
-        <div className="plate p-6">
-          <h2 className="label mb-4">
-            Par population
-          </h2>
-          <ul className="flex flex-col gap-3">
-            {popEntries.map(([key, value]) => (
-              <li key={key}>
-                <div className="mb-1 flex items-center justify-between text-sm">
-                  <span>{POP_LABELS[key] ?? key}</span>
-                  <span className="tabular-nums text-[var(--muted)]">{value}</span>
-                </div>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--border)]">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-[var(--blood)] to-[var(--gold)]"
-                    style={{ width: `${(value / maxPop) * 100}%` }}
-                  />
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
+      <section>
+        <h2 className="ledger-label mb-3">Par statut</h2>
+        <ul className="flex flex-col gap-3">
+          {statusEntries.map(([key, value]) => (
+            <li key={key}>
+              <div className="ledger-row">
+                <span className="lr-key">{STATUS_LABELS[key] ?? key}</span>
+                <span className="lr-leader" />
+                <span className="num lr-val">{value}</span>
+              </div>
+              <div className="ledger-bar-track mt-1.5">
+                <div
+                  className="ledger-bar-fill"
+                  style={{ width: `${(value / maxStatus) * 100}%` }}
+                />
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
 
-      <div className="plate p-6">
-        <h2 className="label mb-4">
-          Royaumes d’attention
-        </h2>
+      <section>
+        <h2 className="ledger-label mb-3">Par population</h2>
+        <ul className="flex flex-col gap-3">
+          {popEntries.map(([key, value]) => (
+            <li key={key}>
+              <div className="ledger-row">
+                <span className="lr-key">{POP_LABELS[key] ?? key}</span>
+                <span className="lr-leader" />
+                <span className="num lr-val">{value}</span>
+              </div>
+              <div className="ledger-bar-track mt-1.5">
+                <div
+                  className="ledger-bar-fill"
+                  style={{ width: `${(value / maxPop) * 100}%` }}
+                />
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section>
+        <h2 className="ledger-label mb-3">Royaumes d’attention</h2>
         {data.topRealms.length === 0 ? (
-          <p className="text-sm text-[var(--muted)]">Aucun royaume à signaler.</p>
+          <p className="text-sm italic text-[var(--ink-mute)]">Aucun royaume à signaler.</p>
         ) : (
-          <ul className="divide-y divide-[var(--border)]">
+          <ul className="flex flex-col gap-1">
             {data.topRealms.map((r) => (
-              <li key={r.slug} className="flex items-center justify-between py-3 text-sm">
-                <span className="font-medium">{r.name}</span>
-                <span className="flex items-center gap-3 text-[var(--muted)]">
-                  <span>{POP_LABELS[r.population] ?? r.population}</span>
-                  <span
-                    className={
-                      r.status === "UP"
-                        ? "text-[var(--gold-bright)]"
-                        : "text-red-400"
-                    }
-                  >
-                    {STATUS_LABELS[r.status] ?? r.status}
-                  </span>
+              <li key={r.slug} className="ledger-row">
+                <span className="lr-key">
+                  {r.name}{" "}
+                  <span className="text-xs text-[var(--ink-mute)]">· {POP_LABELS[r.population] ?? r.population}</span>
+                </span>
+                <span className="lr-leader" />
+                <span className={`lr-val ${r.status === "UP" ? "text-[var(--rune)]" : "text-[var(--blood)]"}`}>
+                  {STATUS_LABELS[r.status] ?? r.status}
                   {r.hasQueue && (
-                    <span className="text-[10px] uppercase tracking-widest text-amber-300">
-                      file
-                    </span>
+                    <span className="ml-2 text-xs text-[var(--blood-bright)]">file</span>
                   )}
                 </span>
               </li>
             ))}
           </ul>
         )}
-      </div>
+      </section>
     </div>
   );
 }

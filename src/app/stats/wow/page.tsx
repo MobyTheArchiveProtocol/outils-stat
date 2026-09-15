@@ -9,9 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function WowStatsPage() {
-  return (
-    <div className="mx-auto w-full max-w-5xl flex-1 px-6 py-12">
-      <WowStatsClient initialRegion={DEFAULT_REGION} />
-    </div>
-  );
+  return <WowStatsClient initialRegion={DEFAULT_REGION} />;
 }

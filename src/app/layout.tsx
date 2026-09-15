@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     template: "%s — outils-stat",
   },
   description:
-    "Consultez les statistiques de vos jeux. Annuaire de data brute, zéro publicité, zéro tracking — l'esprit des vieux grimoires de stats.",
+    "Consultez les statistiques de vos jeux. Un registre de data brute, zéro publicité, zéro tracking — l'esprit des vieux grimoires de stats.",
   robots: { index: true, follow: true },
   referrer: "no-referrer",
   openGraph: {
@@ -24,49 +24,68 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#07060a",
+  themeColor: "#15110b",
   width: "device-width",
   initialScale: 1,
 };
+
+const NAV = [
+  { href: "/stats/wow", label: "Royaumes" },
+  { href: "/stats/wow/character", label: "Personnage" },
+  { href: "/a-propos", label: "Le concept" },
+];
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="fr" className={`${cinzel.variable} ${ebGaramond.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-        <header className="relative border-b border-[var(--border-gold)]">
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[var(--gold)]/50 to-transparent" />
-          <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-5">
-            <Link
-              href="/"
-              className="h1 text-lg tracking-wide"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              ⚔ outils-stat
-            </Link>
-            <nav className="flex items-center gap-6 text-sm">
-              <Link href="/stats/wow" className="transition-colors hover:text-[var(--gold-bright)]">
-                WoW
-              </Link>
-              <Link
-                href="/stats/wow/character"
-                className="transition-colors hover:text-[var(--gold-bright)]"
+        {/* Chamber banner: dark, gilded, with crest */}
+        <header className="relative border-b border-[var(--chamber-edge)]">
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[var(--gold)]/60 to-transparent" />
+          <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-6 py-6 sm:flex-row sm:items-center sm:justify-between">
+            <Link href="/" className="group flex items-center gap-3">
+              <span
+                className="grid h-9 w-9 place-items-center border border-[var(--gold-deep)] text-lg text-[var(--gold-leaf)]"
+                style={{ fontFamily: "var(--font-display)" }}
+                aria-hidden
               >
-                Personnage
-              </Link>
-              <Link href="/a-propos" className="transition-colors hover:text-[var(--gold-bright)]">
-                À propos
-              </Link>
+                ⚔
+              </span>
+              <span
+                className="text-xl tracking-wide text-[var(--gold-leaf)]"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                outils-stat
+              </span>
+            </Link>
+            <nav className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-[var(--gold-leaf)]/80">
+              {NAV.map((n) => (
+                <Link
+                  key={n.href}
+                  href={n.href}
+                  className="border-b border-dotted border-transparent transition-colors hover:border-[var(--gold)] hover:text-[var(--gold-leaf)]"
+                >
+                  {n.label}
+                </Link>
+              ))}
+              <span className="mx-1 hidden h-4 w-px bg-[var(--chamber-edge)] sm:inline-block" />
+              <AccountWidget />
             </nav>
-            <AccountWidget />
           </div>
         </header>
-        <main className="relative flex flex-1 flex-col">{children}</main>
-        <footer className="relative border-t border-[var(--border-gold)]">
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[var(--gold)]/40 to-transparent" />
-          <div className="mx-auto w-full max-w-5xl px-6 py-6">
-            <div className="glyph-sep mb-3 text-xs">◆ ◆ ◆</div>
-            <p className="text-center text-xs text-[var(--muted)]">
-              Data Blizzard © Blizzard Entertainment · Pas de pub, pas de tracking. Que la data, gravée dans la pierre.
+
+        {/* Parchment chamber: the manuscript page sits inside */}
+        <main className="relative flex flex-1 flex-col py-8 sm:py-12">
+          <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">{children}</div>
+        </main>
+
+        {/* Colophon / wax-seal footer */}
+        <footer className="relative mt-auto border-t border-[var(--chamber-edge)] pb-10 pt-8">
+          <div className="mx-auto w-full max-w-6xl px-6">
+            <div className="fleuron mb-4 text-[var(--gold-deep)]">❦ ❦ ❦</div>
+            <p className="text-center text-xs text-[var(--gold-leaf)]/70" style={{ fontFamily: "var(--font-body)" }}>
+              Data Blizzard © Blizzard Entertainment · Pas de pub, pas de tracking. Que la data,
+              gravée dans la pierre.
             </p>
           </div>
         </footer>
