@@ -11,7 +11,7 @@ export default function LogoutButton() {
         await fetch("/api/auth/callback", { method: "DELETE" });
         router.refresh();
       }}
-      className="transition-colors hover:text-[var(--foreground)] text-[var(--muted)]"
+      className="transition-colors hover:text-[var(--gold-bright)] text-[var(--muted)]"
     >
       Déconnexion
     </button>

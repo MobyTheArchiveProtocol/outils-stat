@@ -1,37 +1,41 @@
 @import "tailwindcss";
 
 :root {
-  --background: #060912;
-  --background-2: #080d18;
-  --foreground: #e6edf6;
-  --foreground-frost: #f0f7ff;
-  --accent: #7dd3fc;
-  --accent-deep: #38bdf8;
-  --accent-saronite: #818cf8;
-  --muted: #5b6b82;
-  --card: #0a1320;
-  --card-frost: #0d1a2b;
-  --border: #16243a;
-  --border-frost: #1e3a5f;
-  --glow: rgba(125, 211, 252, 0.16);
-  --glow-soft: rgba(56, 189, 248, 0.08);
+  --background: #07060a;
+  --background-2: #0c0a10;
+  --foreground: #d8cbb0;
+  --foreground-bright: #f2e6c9;
+  --gold: #c9a227;
+  --gold-bright: #e8c661;
+  --gold-dim: #8a6d1a;
+  --blood: #8a1f1f;
+  --blood-bright: #b8322f;
+  --parchment: #e8dcc0;
+  --muted: #6b5d44;
+  --card: #100c14;
+  --card-2: #15101a;
+  --border: #3a2f1a;
+  --border-gold: #5a4a22;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-background-2: var(--background-2);
   --color-foreground: var(--foreground);
-  --color-foreground-frost: var(--foreground-frost);
-  --color-accent: var(--accent);
-  --color-accent-deep: var(--accent-deep);
-  --color-accent-saronite: var(--accent-saronite);
+  --color-foreground-bright: var(--foreground-bright);
+  --color-gold: var(--gold);
+  --color-gold-bright: var(--gold-bright);
+  --color-gold-dim: var(--gold-dim);
+  --color-blood: var(--blood);
+  --color-blood-bright: var(--blood-bright);
+  --color-parchment: var(--parchment);
   --color-muted: var(--muted);
   --color-card: var(--card);
-  --color-card-frost: var(--card-frost);
+  --color-card-2: var(--card-2);
   --color-border: var(--border);
-  --color-border-frost: var(--border-frost);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-border-gold: var(--border-gold);
+  --font-display: var(--font-cinzel);
+  --font-body: var(--font-ebgaramond);
 }
 
 html {
@@ -41,104 +45,163 @@ html {
 body {
   background-color: var(--background);
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -10%, var(--glow-soft), transparent 70%),
-    radial-gradient(circle at 50% 0%, rgba(129, 140, 248, 0.05), transparent 60%);
+    radial-gradient(ellipse 70% 40% at 50% 0%, rgba(138, 31, 31, 0.10), transparent 60%),
+    radial-gradient(circle at 50% 0%, rgba(201, 162, 39, 0.05), transparent 70%);
   background-attachment: fixed;
   color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-body), Georgia, "Times New Roman", serif;
   -webkit-font-smoothing: antialiased;
 }
 
 @layer components {
-  .frost-card {
+  .h1 {
+    font-family: var(--font-display), serif;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--foreground-bright);
+  }
+  .h1::first-letter {
+    color: var(--gold-bright);
+  }
+  .plate {
     position: relative;
     background-color: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 1rem;
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent 30%);
+    border: 1px solid var(--border-gold);
+    border-radius: 0.25rem;
+    box-shadow: inset 0 0 0 1px rgba(201, 162, 39, 0.12), inset 0 1px 0 rgba(201, 162, 39, 0.05);
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
-  .frost-card::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(180deg, rgba(125, 211, 252, 0.35), transparent 40%);
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-    opacity: 0.5;
-    transition: opacity 0.2s ease;
+  .plate:hover {
+    border-color: var(--gold);
+    box-shadow: inset 0 0 0 1px rgba(201, 162, 39, 0.22), 0 0 18px -6px rgba(201, 162, 39, 0.25);
   }
-  .frost-card:hover {
-    border-color: var(--border-frost);
-    box-shadow: 0 0 0 1px var(--glow), 0 8px 30px -12px var(--glow);
+  .plate-frame {
+    position: relative;
+    background-color: var(--card);
+    border: 2px solid var(--border-gold);
+    border-radius: 0.25rem;
+    box-shadow: inset 0 0 0 1px rgba(7, 6, 10, 0.8), inset 0 0 0 2px rgba(201, 162, 39, 0.15);
   }
-  .frost-card:hover::before {
-    opacity: 1;
-  }
-  .frost-input {
+  .field {
     height: 2.5rem;
-    border-radius: 0.5rem;
+    border-radius: 0.25rem;
     border: 1px solid var(--border);
-    background-color: var(--card-frost);
+    background-color: var(--background-2);
     padding-left: 0.75rem;
     padding-right: 0.75rem;
-    font-size: 0.875rem;
-    color: var(--foreground);
+    font-size: 0.95rem;
+    color: var(--foreground-bright);
     outline: none;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    font-family: var(--font-body), Georgia, serif;
   }
-  .frost-input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--glow-soft);
+  .field:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.18);
   }
-  .frost-button {
+  .btn-gold {
     height: 2.5rem;
-    border-radius: 9999px;
-    background-image: linear-gradient(180deg, var(--accent), var(--accent-deep));
+    border-radius: 0.25rem;
+    background-image: linear-gradient(180deg, var(--gold-bright), var(--gold) 60%, var(--gold-dim));
     padding-left: 1.5rem;
     padding-right: 1.5rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #05101e;
-    transition: filter 0.15s ease, box-shadow 0.15s ease;
-    box-shadow: 0 0 24px -8px var(--glow);
+    font-family: var(--font-display), serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: #1a1208;
+    border: 1px solid var(--gold-dim);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 2px 6px rgba(0, 0, 0, 0.4);
+    transition: filter 0.15s ease;
   }
-  .frost-button:hover {
-    filter: brightness(1.05);
-    box-shadow: 0 0 32px -6px var(--glow);
+  .btn-gold:hover {
+    filter: brightness(1.08);
   }
-  .frost-button:disabled {
+  .btn-gold:disabled {
     opacity: 0.5;
-    box-shadow: none;
   }
-  .frost-link {
-    transition: color 0.15s ease;
+  .btn-ghost {
+    height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.25rem;
+    border: 1px solid var(--border-gold);
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    font-family: var(--font-display), serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--foreground-bright);
+    background-color: rgba(201, 162, 39, 0.04);
+    transition: border-color 0.15s ease, background-color 0.15s ease;
   }
-  .frost-link:hover {
-    color: var(--accent);
+  .btn-ghost:hover {
+    border-color: var(--gold);
+    background-color: rgba(201, 162, 39, 0.1);
+  }
+  .glyph-sep {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    color: var(--gold-dim);
+  }
+  .glyph-sep::before,
+  .glyph-sep::after {
+    content: "";
+    height: 1px;
+    flex: 1;
+    background: linear-gradient(90deg, transparent, var(--border-gold), transparent);
+  }
+  .eyebrow {
+    font-family: var(--font-display), serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold-bright);
+  }
+  .label {
+    font-family: var(--font-display), serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .stat-num {
+    font-family: var(--font-display), serif;
+    font-variant-numeric: tabular-nums;
   }
 }
 
 ::selection {
-  background: rgba(125, 211, 252, 0.3);
-  color: var(--foreground-frost);
+  background: rgba(201, 162, 39, 0.3);
+  color: var(--foreground-bright);
 }
 
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
 }
 ::-webkit-scrollbar-track {
   background: var(--background);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border-frost);
-  border-radius: 9999px;
+  background: var(--border-gold);
+  border-radius: 0;
   border: 2px solid var(--background);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-deep);
+  background: var(--gold);
+}
+
+a {
+  color: inherit;
+}
+a:hover {
+  color: var(--gold-bright);
 }

@@ -49,27 +49,27 @@ export default function WowStatsClient({ initialRegion }: { initialRegion: Regio
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <span className="font-mono text-xs uppercase tracking-[0.3em] text-[var(--accent)]">❄ Norfendre</span>
-          <h1 className="mt-2 text-3xl font-semibold uppercase tracking-tight text-[var(--foreground-frost)]">World of Warcraft</h1>
+          <span className="eyebrow">⚔ Sang &amp; or</span>
+          <h1 className="h1 mt-2 text-3xl uppercase tracking-tight">World of Warcraft</h1>
           <p className="mt-1 text-sm text-[var(--muted)]">
             Statut des royaumes connectés · source Battle.net API
           </p>
           <Link
             href="/stats/wow/character"
-            className="mt-2 inline-block font-mono text-xs text-[var(--accent)] underline-offset-4 hover:underline"
+            className="mt-2 inline-block text-xs text-[var(--gold-bright)] underline-offset-4 hover:underline"
           >
             rechercher un personnage →
           </Link>
         </div>
         <div className="flex items-center gap-2">
-          <label htmlFor="region" className="font-mono text-xs uppercase tracking-widest text-[var(--muted)]">
+          <label htmlFor="region" className="label">
             région
           </label>
           <select
             id="region"
             value={region}
             onChange={(e) => setRegion(e.target.value as Region)}
-            className="frost-input font-mono"
+            className="field"
           >
             {REGIONS.map((r) => (
               <option key={r} value={r}>
@@ -80,7 +80,7 @@ export default function WowStatsClient({ initialRegion }: { initialRegion: Regio
           <button
             type="button"
             onClick={handleRefresh}
-            className="h-10 rounded-lg border border-[var(--border)] px-3 font-mono text-xs uppercase tracking-widest text-[var(--muted)] transition-colors hover:border-[var(--border-frost)] hover:text-[var(--foreground)]"
+            className="btn-ghost h-10 px-3 text-xs"
           >
             refresh
           </button>
@@ -98,7 +98,7 @@ function LoadingState() {
   return (
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="h-28 animate-pulse frost-card" />
+        <div key={i} className="h-28 animate-pulse plate" />
       ))}
     </div>
   );
@@ -107,7 +107,7 @@ function LoadingState() {
 function ErrorState({ message }: { message: string }) {
   return (
     <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-6">
-      <p className="font-mono text-sm text-red-300">Impossible de charger les stats.</p>
+      <p className="text-sm text-red-300">Impossible de charger les stats.</p>
       <p className="mt-2 text-sm text-[var(--muted)]">{message}</p>
       <p className="mt-3 text-xs text-[var(--muted)]">
         Vérifiez que les credentials Blizzard sont configurés côté serveur.
@@ -131,9 +131,9 @@ const POP_LABELS: Record<string, string> = {
 
 function StatCard({ label, value, hint }: { label: string; value: string | number; hint?: string }) {
   return (
-    <div className="frost-card p-5">
-      <p className="font-mono text-xs uppercase tracking-widest text-[var(--muted)]">{label}</p>
-      <p className="mt-2 text-3xl font-semibold tabular-nums">{value}</p>
+    <div className="plate p-5">
+      <p className="label">{label}</p>
+      <p className="stat-num mt-2 text-3xl font-semibold">{value}</p>
       {hint && <p className="mt-1 text-xs text-[var(--muted)]">{hint}</p>}
     </div>
   );
@@ -158,8 +158,8 @@ function StatsView({ data }: { data: RegionStat }) {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="frost-card p-6">
-          <h2 className="mb-4 font-mono text-xs uppercase tracking-widest text-[var(--muted)]">
+        <div className="plate p-6">
+          <h2 className="label mb-4">
             Par statut
           </h2>
           <ul className="flex flex-col gap-3">
@@ -171,7 +171,7 @@ function StatsView({ data }: { data: RegionStat }) {
                 </div>
                 <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--border)]">
                   <div
-                    className="h-full rounded-full bg-[var(--accent)]"
+                    className="h-full rounded-full bg-[var(--gold)]"
                     style={{ width: `${(value / maxStatus) * 100}%` }}
                   />
                 </div>
@@ -180,8 +180,8 @@ function StatsView({ data }: { data: RegionStat }) {
           </ul>
         </div>
 
-        <div className="frost-card p-6">
-          <h2 className="mb-4 font-mono text-xs uppercase tracking-widest text-[var(--muted)]">
+        <div className="plate p-6">
+          <h2 className="label mb-4">
             Par population
           </h2>
           <ul className="flex flex-col gap-3">
@@ -193,7 +193,7 @@ function StatsView({ data }: { data: RegionStat }) {
                 </div>
                 <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--border)]">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-[var(--accent-deep)] to-[var(--accent)]"
+                    className="h-full rounded-full bg-gradient-to-r from-[var(--blood)] to-[var(--gold)]"
                     style={{ width: `${(value / maxPop) * 100}%` }}
                   />
                 </div>
@@ -203,8 +203,8 @@ function StatsView({ data }: { data: RegionStat }) {
         </div>
       </div>
 
-      <div className="frost-card p-6">
-        <h2 className="mb-4 font-mono text-xs uppercase tracking-widest text-[var(--muted)]">
+      <div className="plate p-6">
+        <h2 className="label mb-4">
           Royaumes d’attention
         </h2>
         {data.topRealms.length === 0 ? (
@@ -219,14 +219,14 @@ function StatsView({ data }: { data: RegionStat }) {
                   <span
                     className={
                       r.status === "UP"
-                        ? "text-[var(--accent)]"
+                        ? "text-[var(--gold-bright)]"
                         : "text-red-400"
                     }
                   >
                     {STATUS_LABELS[r.status] ?? r.status}
                   </span>
                   {r.hasQueue && (
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-amber-300">
+                    <span className="text-[10px] uppercase tracking-widest text-amber-300">
                       file
                     </span>
                   )}

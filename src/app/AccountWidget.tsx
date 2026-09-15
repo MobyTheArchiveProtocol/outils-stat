@@ -18,7 +18,7 @@ export default async function AccountWidget() {
   if (session) {
     return (
       <span className="flex items-center gap-3 text-xs">
-        <span className="font-mono text-[var(--muted)]">
+        <span className="text-[var(--muted)]">
           Battle.net · {session.region.toUpperCase()}
         </span>
         <LogoutButton />
@@ -29,7 +29,7 @@ export default async function AccountWidget() {
   return (
     <Link
       href="/api/auth/login"
-      className="text-xs transition-colors hover:text-[var(--foreground)] text-[var(--muted)]"
+      className="text-xs transition-colors hover:text-[var(--gold-bright)] text-[var(--muted)]"
     >
       Se connecter (Battle.net)
     </Link>

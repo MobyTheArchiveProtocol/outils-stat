@@ -13,14 +13,14 @@ type State =
   | { status: "success"; data: CharacterProfile; progression: CharacterProgression | null; details: CharacterDetails | null };
 
 const QUALITY_COLORS: Record<string, string> = {
-  POOR: "#8a96a8",
-  COMMON: "#e6edf6",
-  UNCOMMON: "#5ade8a",
-  RARE: "#38bdf8",
-  EPIC: "#a78bfa",
-  LEGENDARY: "#fbbf24",
-  ARTIFACT: "#fcd34d",
-  HEIRLOOM: "#7dd3fc",
+  POOR: "#9d9d9d",
+  COMMON: "#ffffff",
+  UNCOMMON: "#1eff00",
+  RARE: "#0070dd",
+  EPIC: "#a335ee",
+  LEGENDARY: "#ff8000",
+  ARTIFACT: "#e6cc80",
+  HEIRLOOM: "#00ccff",
 };
 
 export default function CharacterSearch() {
@@ -91,8 +91,8 @@ export default function CharacterSearch() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <span className="font-mono text-xs uppercase tracking-[0.3em] text-[var(--accent)]">❄ Norfendre</span>
-        <h1 className="mt-2 text-3xl font-semibold uppercase tracking-tight text-[var(--foreground-frost)]">Personnage WoW</h1>
+        <span className="eyebrow">⚔ Sang &amp; or</span>
+        <h1 className="h1 mt-2 text-3xl uppercase tracking-tight">Personnage WoW</h1>
         <p className="mt-1 text-sm text-[var(--muted)]">
           Recherchez un personnage par royaume et nom · source Battle.net Profile API
         </p>
@@ -106,14 +106,14 @@ export default function CharacterSearch() {
         className="flex flex-col gap-3 sm:flex-row sm:items-end"
       >
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="region" className="font-mono text-xs uppercase tracking-widest text-[var(--muted)]">
+          <label htmlFor="region" className="label">
             région
           </label>
           <select
             id="region"
             value={region}
             onChange={(e) => setRegion(e.target.value as Region)}
-            className="frost-input font-mono"
+            className="field"
           >
             {REGIONS.map((r) => (
               <option key={r} value={r}>
@@ -123,7 +123,7 @@ export default function CharacterSearch() {
           </select>
         </div>
         <div className="flex flex-1 flex-col gap-1.5">
-          <label htmlFor="realm" className="font-mono text-xs uppercase tracking-widest text-[var(--muted)]">
+          <label htmlFor="realm" className="label">
             royaume (slug)
           </label>
           <input
@@ -131,11 +131,11 @@ export default function CharacterSearch() {
             value={realm}
             onChange={(e) => setRealm(e.target.value)}
             placeholder="ex : hyjal, draenor, tarren-mill"
-            className="frost-input"
+            className="field"
           />
         </div>
         <div className="flex flex-1 flex-col gap-1.5">
-          <label htmlFor="name" className="font-mono text-xs uppercase tracking-widest text-[var(--muted)]">
+          <label htmlFor="name" className="label">
             nom
           </label>
           <input
@@ -143,21 +143,21 @@ export default function CharacterSearch() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="ex : varian"
-            className="frost-input"
+            className="field"
           />
         </div>
-        <button type="submit" disabled={state.status === "loading"} className="frost-button">
-          {state.status === "loading" ? "..." : "❄ Chercher"}
+        <button type="submit" disabled={state.status === "loading"} className="btn-gold">
+          {state.status === "loading" ? "..." : "⚔ Chercher"}
         </button>
       </form>
 
       {state.status === "loading" && (
-        <div className="h-64 animate-pulse rounded-2xl border border-[var(--border)] bg-[var(--card-frost)]" />
+        <div className="h-64 animate-pulse rounded-2xl border border-[var(--border-gold)] bg-[var(--card-2)]" />
       )}
 
       {state.status === "error" && (
         <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-6">
-          <p className="font-mono text-sm text-red-300">
+          <p className="text-sm text-red-300">
             {state.notFound ? "Personnage introuvable." : "Impossible de charger le personnage."}
           </p>
           <p className="mt-2 text-sm text-[var(--muted)]">{state.message}</p>
@@ -180,7 +180,7 @@ function StatRow({ label, value }: { label: string; value: string | number | nul
   return (
     <div className="flex items-center justify-between border-b border-[var(--border)] py-2.5 text-sm">
       <span className="text-[var(--muted)]">{label}</span>
-      <span className="font-medium tabular-nums text-[var(--foreground-frost)]">{value ?? "—"}</span>
+      <span className="font-medium tabular-nums text-[var(--foreground-bright)]">{value ?? "—"}</span>
     </div>
   );
 }
@@ -196,17 +196,17 @@ function ProfileView({
 }) {
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-6 frost-card p-6 sm:flex-row">
+      <div className="flex flex-col gap-6 plate p-6 sm:flex-row">
         {data.avatarUrl && (
-          <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl border border-[var(--border)] bg-black/30">
+          <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl border border-[var(--border-gold)] bg-black/30">
             <Image src={data.avatarUrl} alt={data.name} fill sizes="96px" className="object-cover" unoptimized />
           </div>
         )}
         <div className="flex flex-col gap-1">
-          <h2 className="text-2xl font-semibold uppercase tracking-tight text-[var(--foreground-frost)]">
+          <h2 className="h1 text-2xl uppercase tracking-tight">
             {data.name}
             {!data.isValid && (
-              <span className="ml-2 font-mono text-xs uppercase tracking-widest text-amber-300">
+              <span className="ml-2 eyebrow text-amber-300">
                 invalide
               </span>
             )}
@@ -219,14 +219,14 @@ function ProfileView({
             {data.region.toUpperCase()} {data.factionName && `· ${data.factionName}`}
           </p>
           {data.guildName && (
-            <p className="text-sm text-[var(--accent-saronite)]">⟨ {data.guildName} ⟩</p>
+            <p className="text-sm text-[var(--blood-bright)]">⟨ {data.guildName} ⟩</p>
           )}
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="frost-card p-6">
-          <h3 className="mb-2 font-mono text-xs uppercase tracking-widest text-[var(--muted)]">
+        <div className="plate p-6">
+          <h3 className="label mb-2">
             Aperçu
           </h3>
           <StatRow label="Niveau" value={data.level} />
@@ -240,8 +240,8 @@ function ProfileView({
           <StatRow label="Guilde" value={data.guildName ?? "—"} />
         </div>
 
-        <div className="frost-card p-6">
-          <h3 className="mb-2 font-mono text-xs uppercase tracking-widest text-[var(--muted)]">
+        <div className="plate p-6">
+          <h3 className="label mb-2">
             Équipement
           </h3>
           {data.equipment.length === 0 ? (
@@ -278,7 +278,7 @@ function ProfileView({
 function ProgressionSkeleton() {
   return (
     <div className="flex flex-col gap-6">
-      <div className="h-32 animate-pulse rounded-2xl border border-[var(--border)] bg-[var(--card-frost)]" />
+      <div className="h-32 animate-pulse rounded-2xl border border-[var(--border-gold)] bg-[var(--card-2)]" />
     </div>
   );
 }
@@ -294,12 +294,12 @@ function ProgressionSections({ progression }: { progression: CharacterProgressio
   return (
     <div className="flex flex-col gap-6">
       {progression.achievements && (
-        <div className="frost-card p-6">
+        <div className="plate p-6">
           <div className="flex items-center justify-between">
-            <h3 className="font-mono text-xs uppercase tracking-widest text-[var(--muted)]">
+            <h3 className="label">
               Hauts faits
             </h3>
-            <span className="font-mono text-sm tabular-nums text-[var(--accent)]">
+            <span className="stat-num text-sm text-[var(--gold-bright)]">
               {progression.achievements.totalPoints.toLocaleString("fr-FR")} pts ·{" "}
               {progression.achievements.totalQuantity} complétés
             </span>
@@ -311,7 +311,7 @@ function ProgressionSections({ progression }: { progression: CharacterProgressio
               {progression.achievements.recent.map((a, i) => (
                 <li key={i} className="flex items-center justify-between text-sm">
                   <span>{a.name}</span>
-                  <span className="font-mono text-xs text-[var(--muted)]">
+                  <span className="stat-num text-xs text-[var(--muted)]">
                     {a.completedAt ? new Date(a.completedAt).toLocaleDateString("fr-FR") : "—"}
                   </span>
                 </li>
@@ -322,8 +322,8 @@ function ProgressionSections({ progression }: { progression: CharacterProgressio
       )}
 
       {progression.mythicPlus && (
-        <div className="frost-card p-6">
-          <h3 className="mb-4 font-mono text-xs uppercase tracking-widest text-[var(--muted)]">
+        <div className="plate p-6">
+          <h3 className="label mb-4">
             Mythic+ · saison {progression.mythicPlus.seasonId ?? "?"}
           </h3>
           {progression.mythicPlus.bestRuns.length === 0 ? (
@@ -337,15 +337,15 @@ function ProgressionSections({ progression }: { progression: CharacterProgressio
                   <div className="flex items-center justify-between">
                     <span className="font-medium">{run.dungeonName}</span>
                     <span className="flex items-center gap-3">
-                      <span className="font-mono tabular-nums text-[var(--accent)]">
+                      <span className="stat-num text-[var(--gold-bright)]">
                         +{run.keystoneLevel}
                       </span>
                       {run.completedWithinTime ? (
-                        <span className="font-mono text-[10px] uppercase tracking-widest text-emerald-300">
+                        <span className="text-[10px] uppercase tracking-widest text-emerald-300">
                           dans le temps
                         </span>
                       ) : (
-                        <span className="font-mono text-[10px] uppercase tracking-widest text-amber-300">
+                        <span className="text-[10px] uppercase tracking-widest text-amber-300">
                           hors temps
                         </span>
                       )}
@@ -366,8 +366,8 @@ function ProgressionSections({ progression }: { progression: CharacterProgressio
       )}
 
       {progression.statistics && progression.statistics.length > 0 && (
-        <div className="frost-card p-6">
-          <h3 className="mb-4 font-mono text-xs uppercase tracking-widest text-[var(--muted)]">
+        <div className="plate p-6">
+          <h3 className="label mb-4">
             Statistiques notables
           </h3>
           <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -378,7 +378,7 @@ function ProgressionSections({ progression }: { progression: CharacterProgressio
               .map((s, i) => (
                 <li key={i} className="flex items-center justify-between text-sm">
                   <span className="truncate pr-2 text-[var(--muted)]">{s.name}</span>
-                  <span className="font-mono tabular-nums">{s.quantity.toLocaleString("fr-FR")}</span>
+                  <span className="stat-num">{s.quantity.toLocaleString("fr-FR")}</span>
                 </li>
               ))}
           </ul>
@@ -400,9 +400,9 @@ function Section({
   empty?: string;
 }) {
   return (
-    <div className="frost-card p-6">
+    <div className="plate p-6">
       <div className="flex items-center justify-between">
-        <h3 className="font-mono text-xs uppercase tracking-widest text-[var(--muted)]">{title}</h3>
+        <h3 className="label">{title}</h3>
         {right}
       </div>
       {empty ? <p className="mt-4 text-sm text-[var(--muted)]">{empty}</p> : <div className="mt-4">{children}</div>}
@@ -417,7 +417,7 @@ function DetailsSections({ details }: { details: CharacterDetails }) {
         <Section
           title="Collections"
           right={
-            <span className="font-mono text-sm tabular-nums text-[var(--accent)]">
+            <span className="stat-num text-sm text-[var(--gold-bright)]">
               {details.collections.mounts?.length ?? 0} montures ·{" "}
               {details.collections.pets?.length ?? 0} mascottes ·{" "}
               {details.collections.toys?.length ?? 0} jouets
@@ -461,7 +461,7 @@ function DetailsSections({ details }: { details: CharacterDetails }) {
                     {inst.modes.map((mode, mi) => (
                       <div key={mi} className="flex items-center justify-between text-sm">
                         <span className="text-[var(--muted)]">{mode.difficultyName}</span>
-                        <span className="font-mono tabular-nums">
+                        <span className="stat-num">
                           {mode.completedCount}/{mode.totalCount} · {mode.statusName}
                         </span>
                       </div>
@@ -486,7 +486,7 @@ function DetailsSections({ details }: { details: CharacterDetails }) {
                     {inst.modes.map((mode, mi) => (
                       <div key={mi} className="flex items-center justify-between text-sm">
                         <span className="text-[var(--muted)]">{mode.difficultyName}</span>
-                        <span className="font-mono tabular-nums">
+                        <span className="stat-num">
                           {mode.completedCount}/{mode.totalCount} · {mode.statusName}
                         </span>
                       </div>
@@ -503,7 +503,7 @@ function DetailsSections({ details }: { details: CharacterDetails }) {
         <Section
           title="PvP"
           right={
-            <span className="font-mono text-sm tabular-nums text-[var(--accent)]">
+            <span className="stat-num text-sm text-[var(--gold-bright)]">
               {details.pvp.honorLevel} honneur · {details.pvp.honorableKills.toLocaleString("fr-FR")} kills
             </span>
           }
@@ -515,7 +515,7 @@ function DetailsSections({ details }: { details: CharacterDetails }) {
                   <li key={i} className="text-sm">
                     <div className="flex items-center justify-between">
                       <span className="font-medium uppercase">{b.bracket}</span>
-                      <span className="font-mono tabular-nums text-[var(--accent)]">{b.rating}</span>
+                      <span className="stat-num text-[var(--gold-bright)]">{b.rating}</span>
                     </div>
                     <div className="text-xs text-[var(--muted)]">
                       saison {b.seasonWon}–{b.seasonLost} ({b.seasonPlayed}) · semaine {b.weeklyWon}–{b.weeklyLost}
@@ -529,7 +529,7 @@ function DetailsSections({ details }: { details: CharacterDetails }) {
                 {details.pvp.mapStatistics.map((m, i) => (
                   <li key={i} className="flex items-center justify-between py-2 text-sm">
                     <span>{m.mapName}</span>
-                    <span className="font-mono tabular-nums text-[var(--muted)]">
+                    <span className="stat-num text-[var(--muted)]">
                       {m.won}–{m.lost} ({m.played})
                     </span>
                   </li>
@@ -567,7 +567,7 @@ function DetailsSections({ details }: { details: CharacterDetails }) {
               .map((r, i) => (
                 <li key={i} className="flex items-center justify-between text-sm">
                   <span className="truncate pr-2">{r.faction}</span>
-                  <span className="font-mono tabular-nums text-[var(--muted)]">
+                  <span className="stat-num text-[var(--muted)]">
                     {r.standingName} ({r.value}/{r.max})
                   </span>
                 </li>
@@ -580,13 +580,13 @@ function DetailsSections({ details }: { details: CharacterDetails }) {
         <Section
           title="Titres"
           right={
-            <span className="font-mono text-sm tabular-nums text-[var(--accent)]">
+            <span className="stat-num text-sm text-[var(--gold-bright)]">
               {details.titles.list.length}
             </span>
           }
         >
           {details.titles.active && (
-            <p className="mb-3 text-sm text-[var(--accent)]">« {details.titles.active} » (actif)</p>
+            <p className="mb-3 text-sm text-[var(--gold-bright)]">« {details.titles.active} » (actif)</p>
           )}
           <ul className="grid grid-cols-1 gap-1 sm:grid-cols-2">
             {details.titles.list.slice(0, 40).map((t, i) => (
