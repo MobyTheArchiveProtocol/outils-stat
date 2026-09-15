@@ -3,6 +3,7 @@
 import { useCallback, useState, type ReactNode } from "react";
 import Image from "next/image";
 
+import { classColor, factionColor, qualityColor } from "@/lib/blizzard/colors";
 import { DEFAULT_REGION, REGIONS, type Region } from "@/lib/blizzard/regions";
 import type { CharacterDetails, CharacterProfile, CharacterProgression } from "@/lib/blizzard/types";
 
@@ -11,17 +12,6 @@ type State =
   | { status: "loading" }
   | { status: "error"; message: string; notFound?: boolean }
   | { status: "success"; data: CharacterProfile; progression: CharacterProgression | null; details: CharacterDetails | null };
-
-const QUALITY_COLORS: Record<string, string> = {
-  POOR: "#9d9d9d",
-  COMMON: "#1a1a1a",
-  UNCOMMON: "#1eff00",
-  RARE: "#0070dd",
-  EPIC: "#a335ee",
-  LEGENDARY: "#ff8000",
-  ARTIFACT: "#a23b1a",
-  HEIRLOOM: "#00ccff",
-};
 
 export default function CharacterSearch() {
   const [region, setRegion] = useState<Region>(DEFAULT_REGION);
@@ -65,7 +55,7 @@ export default function CharacterSearch() {
           setState({ status: "success", data, progression: progJson as CharacterProgression, details: null });
         }
       } catch {
-        // progression stays null — already displayed profile
+        // progression stays null
       }
 
       try {
@@ -89,31 +79,33 @@ export default function CharacterSearch() {
   }, [region, realm, name]);
 
   return (
-    <article className="manuscript ornament-corners gilt-frame">
-      <header className="border-b border-dotted border-[var(--ink-mute)] pb-6">
-        <p className="chap-label">⚔ Chapitre II</p>
-        <h1 className="h-chronicle mt-2 text-3xl uppercase sm:text-4xl">Registre du personnage</h1>
-        <p className="mt-1 text-sm italic text-[var(--ink-faded)]">
-          Inscrivez le royaume et le nom · source Battle.net Profile API
+    <div className="flex flex-col gap-6">
+      <div>
+        <span className="kicker">World of Warcraft</span>
+        <h1 className="mt-2 text-2xl font-semibold uppercase tracking-tight text-[var(--text)] sm:text-3xl">
+          Recherche de personnage
+        </h1>
+        <p className="mt-1 text-sm muted">
+          Statut, progression, collections · source Battle.net Profile API
         </p>
-      </header>
+      </div>
 
       <form
         onSubmit={(e) => {
           e.preventDefault();
           void load();
         }}
-        className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-end"
+        className="panel flex flex-col gap-3 p-4 sm:flex-row sm:items-end"
       >
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="region" className="ledger-label">
+          <label htmlFor="region" className="kicker">
             région
           </label>
           <select
             id="region"
             value={region}
             onChange={(e) => setRegion(e.target.value as Region)}
-            className="ink-field"
+            className="field"
           >
             {REGIONS.map((r) => (
               <option key={r} value={r}>
@@ -123,67 +115,65 @@ export default function CharacterSearch() {
           </select>
         </div>
         <div className="flex flex-1 flex-col gap-1.5">
-          <label htmlFor="realm" className="ledger-label">
+          <label htmlFor="realm" className="kicker">
             royaume (slug)
           </label>
           <input
             id="realm"
             value={realm}
             onChange={(e) => setRealm(e.target.value)}
-            placeholder="ex : hyjal, draenor, tarren-mill"
-            className="ink-field"
+            placeholder="hyjal, draenor, tarren-mill…"
+            className="field"
           />
         </div>
         <div className="flex flex-1 flex-col gap-1.5">
-          <label htmlFor="name" className="ledger-label">
+          <label htmlFor="name" className="kicker">
             nom
           </label>
           <input
             id="name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="ex : varian"
-            className="ink-field"
+            placeholder="varian…"
+            className="field"
           />
         </div>
-        <button type="submit" disabled={state.status === "loading"} className="seal-btn">
-          {state.status === "loading" ? "…" : "⚔ Inscire"}
+        <button type="submit" disabled={state.status === "loading"} className="btn-gold">
+          {state.status === "loading" ? "…" : "Chercher"}
         </button>
       </form>
 
-      <div className="mt-6">
-        {state.status === "loading" && (
-          <div className="h-40 animate-pulse bg-[var(--parchment-2)]/60" />
-        )}
+      {state.status === "loading" && (
+        <div className="h-64 animate-pulse panel" />
+      )}
 
-        {state.status === "error" && (
-          <div className="border-l-2 border-[var(--blood)] bg-[var(--parchment-2)]/60 px-4 py-3">
-            <p className="text-sm text-[var(--blood)]">
-              {state.notFound ? "Personnage introuvable." : "Impossible de charger le personnage."}
+      {state.status === "error" && (
+        <div className="panel border-l-2 border-l-[var(--danger)] p-5">
+          <p className="text-sm text-[var(--danger)]">
+            {state.notFound ? "Personnage introuvable." : "Impossible de charger le personnage."}
+          </p>
+          <p className="mt-2 text-sm text-[var(--text-soft)]">{state.message}</p>
+          {state.notFound && (
+            <p className="mt-2 text-xs muted">
+              Vérifiez le slug du royaume et le nom, ou la région sélectionnée.
             </p>
-            <p className="mt-2 text-sm text-[var(--ink-faded)]">{state.message}</p>
-            {state.notFound && (
-              <p className="mt-2 text-xs text-[var(--ink-mute)]">
-                Vérifiez le slug du royaume et le nom, ou la région sélectionnée.
-              </p>
-            )}
-          </div>
-        )}
+          )}
+        </div>
+      )}
 
-        {state.status === "success" && (
-          <ProfileView data={state.data} progression={state.progression} details={state.details} />
-        )}
-      </div>
-    </article>
+      {state.status === "success" && (
+        <ProfileView data={state.data} progression={state.progression} details={state.details} />
+      )}
+    </div>
   );
 }
 
-function LedgerLine({ label, value, accent }: { label: string; value: string | number | null; accent?: string }) {
+function StatRow({ label, value, accent }: { label: string; value: string | number | null; accent?: string }) {
   return (
-    <div className="ledger-row">
-      <span className="lr-key">{label}</span>
-      <span className="lr-leader" />
-      <span className={`num lr-val ${accent ?? ""}`}>{value ?? "—"}</span>
+    <div className="stat-row">
+      <span className="k">{label}</span>
+      <span className="leader" />
+      <span className={`v num ${accent ?? ""}`}>{value ?? "—"}</span>
     </div>
   );
 }
@@ -197,75 +187,101 @@ function ProfileView({
   progression: CharacterProgression | null;
   details: CharacterDetails | null;
 }) {
+  const cColor = classColor(data.className);
+  const fColor = data.factionName ? factionColor(data.factionName) : undefined;
+
   return (
-    <div className="mt-2 flex flex-col gap-12">
-      <section className="flex flex-col gap-6 sm:flex-row sm:items-center">
-        {data.avatarUrl && (
-          <div className="relative h-28 w-28 shrink-0 overflow-hidden border-2 border-[var(--gold-deep)] shadow-[0_0_0_3px_var(--parchment)]">
-            <Image src={data.avatarUrl} alt={data.name} fill sizes="112px" className="object-cover" unoptimized />
-          </div>
-        )}
-        <div className="flex flex-col gap-1">
-          <h2 className="h-chronicle text-3xl uppercase">
-            {data.name}
-            {!data.isValid && (
-              <span className="ml-2 align-middle text-sm font-normal italic text-[var(--blood)]">
-                · invalide
-              </span>
-            )}
-          </h2>
-          {data.guildName && (
-            <p className="text-sm text-[var(--blood)]" style={{ fontFamily: "var(--font-display)" }}>
-              ⟨ {data.guildName} ⟩
+    <div className="flex flex-col gap-6">
+      <div className="panel">
+        <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center">
+          {data.avatarUrl && (
+            <div className="relative h-24 w-24 shrink-0 overflow-hidden border border-[var(--gold-line)] bg-black/40">
+              <Image src={data.avatarUrl} alt={data.name} fill sizes="96px" className="object-cover" unoptimized />
+            </div>
+          )}
+          <div className="flex flex-col gap-1">
+            <div className="flex items-baseline gap-2">
+              <h2 className="text-2xl font-bold uppercase tracking-tight" style={{ color: cColor ?? "var(--text)" }}>
+                {data.name}
+              </h2>
+              {!data.isValid && (
+                <span className="text-xs uppercase tracking-widest text-[var(--warn)]">invalide</span>
+              )}
+            </div>
+            <p className="text-sm text-[var(--text-soft)]">
+              {data.raceName}{" "}
+              <span style={{ color: cColor ?? "var(--text)" }}>{data.className}</span>
+              {data.specName && ` · ${data.specName}`} · Niv. {data.level}
             </p>
-          )}
-          <p className="text-sm text-[var(--ink-soft)]">
-            {data.raceName} {data.className} {data.specName && `· ${data.specName}`} · Niv. {data.level}
-          </p>
-          <p className="text-sm text-[var(--ink-faded)]">
-            {data.realmName} <span className="text-[var(--ink-mute)]">({data.realmSlug})</span> · région{" "}
-            {data.region.toUpperCase()} {data.factionName && `· ${data.factionName}`}
-          </p>
+            <p className="text-sm muted">
+              {data.realmName} ({data.realmSlug}) · région {data.region.toUpperCase()}
+              {data.factionName && (
+                <>
+                  {" · "}
+                  <span style={{ color: fColor ?? "var(--text-soft)" }}>{data.factionName}</span>
+                </>
+              )}
+            </p>
+            {data.guildName && (
+              <p className="text-sm" style={{ color: fColor ?? "var(--gold-bright)" }}>
+                ⟨ {data.guildName} ⟩
+              </p>
+            )}
+          </div>
         </div>
-      </section>
+      </div>
 
-      <div className="grid grid-cols-1 gap-x-12 gap-y-10 lg:grid-cols-2">
-        <section>
-          <h3 className="ledger-label mb-3">Aperçu</h3>
-          <LedgerLine label="Niveau" value={data.level} />
-          <LedgerLine label="Points de hauts faits" value={data.achievementPoints.toLocaleString("fr-FR")} />
-          <LedgerLine label="iLvl moyen" value={data.averageItemLevel} />
-          <LedgerLine label="iLvl équipé" value={data.equippedItemLevel} />
-          <LedgerLine label="Classe" value={data.className} />
-          <LedgerLine label="Spécialisation" value={data.specName || "—"} />
-          <LedgerLine label="Race" value={data.raceName || "—"} />
-          <LedgerLine label="Faction" value={data.factionName || "—"} />
-          <LedgerLine label="Guilde" value={data.guildName ?? "—"} />
-        </section>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="panel">
+          <div className="panel-head">
+            <h3 className="section-title">Aperçu</h3>
+          </div>
+          <div className="p-4">
+            <StatRow label="Niveau" value={data.level} />
+            <StatRow label="Points de hauts faits" value={data.achievementPoints.toLocaleString("fr-FR")} />
+            <StatRow label="iLvl moyen" value={data.averageItemLevel} />
+            <StatRow label="iLvl équipé" value={data.equippedItemLevel} />
+            <StatRow label="Classe" value={data.className} />
+            <StatRow label="Spécialisation" value={data.specName || "—"} />
+            <StatRow label="Race" value={data.raceName || "—"} />
+            <StatRow label="Faction" value={data.factionName || "—"} />
+            <StatRow label="Guilde" value={data.guildName ?? "—"} />
+          </div>
+        </div>
 
-        <section>
-          <h3 className="ledger-label mb-3">Équipement porté</h3>
-          {data.equipment.length === 0 ? (
-            <p className="text-sm italic text-[var(--ink-mute)]">Aucun équipement renvoyé.</p>
-          ) : (
-            <ul className="flex flex-col gap-1">
-              {data.equipment.map((item) => (
-                <li key={item.slot} className="ledger-row">
-                  <span className="lr-key text-[var(--ink-mute)]">{item.slotName}</span>
-                  <span className="lr-leader" />
-                  <span className="lr-val flex items-baseline gap-2">
-                    <span style={{ color: QUALITY_COLORS[item.quality] ?? "var(--ink)" }}>{item.name}</span>
-                    <span className="num text-xs text-[var(--ink-mute)]">{item.level}</span>
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+        <div className="panel">
+          <div className="panel-head">
+            <h3 className="section-title">Équipement</h3>
+          </div>
+          <div className="p-0">
+            {data.equipment.length === 0 ? (
+              <p className="p-4 text-sm muted">Aucun équipement renvoyé.</p>
+            ) : (
+              <table className="tbl">
+                <thead>
+                  <tr>
+                    <th>Emplacement</th>
+                    <th>Objet</th>
+                    <th className="right">iLvl</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.equipment.map((item) => (
+                    <tr key={item.slot}>
+                      <td className="muted">{item.slotName}</td>
+                      <td style={{ color: qualityColor(item.quality) }}>{item.name}</td>
+                      <td className="right num">{item.level}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
       </div>
 
       {progression === null ? (
-        <div className="h-40 animate-pulse bg-[var(--parchment-2)]/60" />
+        <div className="h-40 animate-pulse panel" />
       ) : (
         <ProgressionSections progression={progression} />
       )}
@@ -282,103 +298,6 @@ function formatDuration(ms: number): string {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
-function Chapter({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section>
-      <h3 className="ledger-label mb-3">{title}</h3>
-      {children}
-    </section>
-  );
-}
-
-function ProgressionSections({ progression }: { progression: CharacterProgression }) {
-  return (
-    <div className="flex flex-col gap-12">
-      {progression.achievements && (
-        <Chapter title="Hauts faits">
-          <div className="mb-3 flex items-center justify-between text-sm text-[var(--ink-faded)]">
-            <span>Points accumulés</span>
-            <span className="num text-[var(--blood)]">
-              {progression.achievements.totalPoints.toLocaleString("fr-FR")} pts ·{" "}
-              {progression.achievements.totalQuantity} complétés
-            </span>
-          </div>
-          {progression.achievements.recent.length === 0 ? (
-            <p className="text-sm italic text-[var(--ink-mute)]">Aucun haut fait récent.</p>
-          ) : (
-            <ul className="flex flex-col gap-1">
-              {progression.achievements.recent.map((a, i) => (
-                <li key={i} className="ledger-row">
-                  <span className="lr-key">{a.name}</span>
-                  <span className="lr-leader" />
-                  <span className="num lr-val text-[var(--ink-mute)]">
-                    {a.completedAt ? new Date(a.completedAt).toLocaleDateString("fr-FR") : "—"}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </Chapter>
-      )}
-
-      {progression.mythicPlus && (
-        <Chapter title={`Mythic+ · saison ${progression.mythicPlus.seasonId ?? "?"}`}>
-          {progression.mythicPlus.bestRuns.length === 0 ? (
-            <p className="text-sm italic text-[var(--ink-mute)]">
-              Aucune clé enregistrée pour cette saison.
-            </p>
-          ) : (
-            <ul className="flex flex-col gap-3">
-              {progression.mythicPlus.bestRuns.map((run, i) => (
-                <li key={i}>
-                  <div className="ledger-row">
-                    <span className="lr-key">
-                      {run.dungeonName}
-                      <span className="ml-2 text-xs text-[var(--ink-mute)]">· +{run.keystoneLevel}</span>
-                    </span>
-                    <span className="lr-leader" />
-                    <span className="lr-val text-sm">
-                      {run.completedWithinTime ? (
-                        <span className="text-[var(--rune)]">dans le temps</span>
-                      ) : (
-                        <span className="text-[var(--blood)]">hors temps</span>
-                      )}
-                      <span className="ml-2 num text-[var(--ink-mute)]">{formatDuration(run.duration)}</span>
-                    </span>
-                  </div>
-                  {run.affixes.length > 0 && (
-                    <p className="mt-0.5 pl-1 text-xs italic text-[var(--ink-mute)]">
-                      {run.affixes.join(" · ")} — {new Date(run.completedAt).toLocaleDateString("fr-FR")}
-                    </p>
-                  )}
-                </li>
-              ))}
-            </ul>
-          )}
-        </Chapter>
-      )}
-
-      {progression.statistics && progression.statistics.length > 0 && (
-        <Chapter title="Statistiques notables">
-          <ul className="grid grid-cols-1 gap-x-10 gap-y-1 sm:grid-cols-2">
-            {progression.statistics
-              .slice()
-              .sort((a, b) => b.quantity - a.quantity)
-              .slice(0, 24)
-              .map((s, i) => (
-                <li key={i} className="ledger-row">
-                  <span className="lr-key truncate">{s.name}</span>
-                  <span className="lr-leader" />
-                  <span className="num lr-val">{s.quantity.toLocaleString("fr-FR")}</span>
-                </li>
-              ))}
-          </ul>
-        </Chapter>
-      )}
-    </div>
-  );
-}
-
 function Section({
   title,
   right,
@@ -391,24 +310,116 @@ function Section({
   empty?: string;
 }) {
   return (
-    <section>
-      <div className="mb-3 flex items-center justify-between">
-        <h3 className="ledger-label">{title}</h3>
+    <div className="panel">
+      <div className="panel-head">
+        <h3 className="section-title">{title}</h3>
         {right}
       </div>
-      {empty ? <p className="text-sm italic text-[var(--ink-mute)]">{empty}</p> : <div>{children}</div>}
-    </section>
+      <div className="p-4">
+        {empty ? (
+          <p className="text-sm muted">{empty}</p>
+        ) : (
+          children
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ProgressionSections({ progression }: { progression: CharacterProgression }) {
+  return (
+    <div className="flex flex-col gap-4">
+      {progression.achievements && (
+        <Section
+          title="Hauts faits"
+          right={
+            <span className="num text-sm text-[var(--gold-bright)]">
+              {progression.achievements.totalPoints.toLocaleString("fr-FR")} pts ·{" "}
+              {progression.achievements.totalQuantity} complétés
+            </span>
+          }
+        >
+          {progression.achievements.recent.length === 0 ? (
+            <p className="text-sm muted">Aucun haut fait récent.</p>
+          ) : (
+            <table className="tbl">
+              <tbody>
+                {progression.achievements.recent.map((a, i) => (
+                  <tr key={i}>
+                    <td className="text-[var(--text-soft)]">{a.name}</td>
+                    <td className="right num muted">
+                      {a.completedAt ? new Date(a.completedAt).toLocaleDateString("fr-FR") : "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </Section>
+      )}
+
+      {progression.mythicPlus && (
+        <Section title={`Mythic+ · saison ${progression.mythicPlus.seasonId ?? "?"}`}>
+          {progression.mythicPlus.bestRuns.length === 0 ? (
+            <p className="text-sm muted">Aucune clé enregistrée pour cette saison.</p>
+          ) : (
+            <table className="tbl">
+              <thead>
+                <tr>
+                  <th>Donjon</th>
+                  <th>Clé</th>
+                  <th>Temps</th>
+                  <th className="right">Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+                {progression.mythicPlus.bestRuns.map((run, i) => (
+                  <tr key={i}>
+                    <td className="text-[var(--text)]">{run.dungeonName}</td>
+                    <td className="num text-[var(--gold-bright)]">+{run.keystoneLevel}</td>
+                    <td className="num muted">{formatDuration(run.duration)}</td>
+                    <td className="right">
+                      <span className={run.completedWithinTime ? "text-[var(--rune)]" : "text-[var(--warn)]"}>
+                        {run.completedWithinTime ? "dans le temps" : "hors temps"}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </Section>
+      )}
+
+      {progression.statistics && progression.statistics.length > 0 && (
+        <Section title="Statistiques notables">
+          <div className="grid grid-cols-1 gap-x-8 sm:grid-cols-2">
+            {progression.statistics
+              .slice()
+              .sort((a, b) => b.quantity - a.quantity)
+              .slice(0, 24)
+              .map((s, i) => (
+                <div key={i} className="stat-row">
+                  <span className="k truncate">{s.name}</span>
+                  <span className="leader" />
+                  <span className="v num">{s.quantity.toLocaleString("fr-FR")}</span>
+                </div>
+              ))}
+          </div>
+        </Section>
+      )}
+    </div>
   );
 }
 
 function DetailsSections({ details }: { details: CharacterDetails }) {
   return (
-    <div className="flex flex-col gap-12 border-t border-dotted border-[var(--ink-mute)] pt-12">
+    <div className="flex flex-col gap-4">
       {details.collections && (
         <Section
           title="Collections"
           right={
-            <span className="num text-sm text-[var(--blood)]">
+            <span className="num text-sm text-[var(--gold-bright)]">
               {details.collections.mounts?.length ?? 0} montures ·{" "}
               {details.collections.pets?.length ?? 0} mascottes ·{" "}
               {details.collections.toys?.length ?? 0} jouets
@@ -420,47 +431,57 @@ function DetailsSections({ details }: { details: CharacterDetails }) {
               : undefined
           }
         >
-          <ul className="grid grid-cols-1 gap-x-10 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              ...(details.collections.mounts ?? []).map((m) => ({ name: m.name, sub: m.isFavorite ? "★ favori" : "monture" })),
-              ...(details.collections.pets ?? []).map((p) => ({
-                name: p.name,
-                sub: `mascotte · niv. ${p.level} · ${p.qualityName}`,
-              })),
-              ...(details.collections.toys ?? []).map((t) => ({ name: t.name, sub: "jouet" })),
-            ]
-              .slice(0, 36)
-              .map((item, i) => (
-                <li key={i} className="ledger-row">
-                  <span className="lr-key truncate">{item.name}</span>
-                  <span className="lr-leader" />
-                  <span className="lr-val text-xs text-[var(--ink-mute)]">{item.sub}</span>
-                </li>
-              ))}
-          </ul>
+          <table className="tbl">
+            <thead>
+              <tr>
+                <th>Nom</th>
+                <th className="right">Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                ...(details.collections.mounts ?? []).map((m) => ({ name: m.name, sub: m.isFavorite ? "monture ★" : "monture" })),
+                ...(details.collections.pets ?? []).map((p) => ({
+                  name: p.name,
+                  sub: `mascotte · niv. ${p.level} · ${p.qualityName}`,
+                })),
+                ...(details.collections.toys ?? []).map((t) => ({ name: t.name, sub: "jouet" })),
+              ]
+                .slice(0, 40)
+                .map((item, i) => (
+                  <tr key={i}>
+                    <td className="text-[var(--text-soft)]">{item.name}</td>
+                    <td className="right muted">{item.sub}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
         </Section>
       )}
 
       {details.raids && details.raids.expansions.length > 0 && (
         <Section title="Raids">
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-5">
             {details.raids.expansions.map((exp, ei) => (
               <div key={ei}>
-                <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--ink-soft)]">
+                <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--text-soft)]">
                   {exp.name}
                 </p>
                 {exp.instances.map((inst, ii) => (
                   <div key={ii} className="mb-3">
-                    <p className="text-xs italic text-[var(--ink-mute)]">{inst.name}</p>
-                    {inst.modes.map((mode, mi) => (
-                      <div key={mi} className="ledger-row">
-                        <span className="lr-key text-[var(--ink-faded)]">{mode.difficultyName}</span>
-                        <span className="lr-leader" />
-                        <span className="num lr-val">
-                          {mode.completedCount}/{mode.totalCount} · {mode.statusName}
-                        </span>
-                      </div>
-                    ))}
+                    <p className="mb-1 text-xs muted">{inst.name}</p>
+                    <table className="tbl">
+                      <tbody>
+                        {inst.modes.map((mode, mi) => (
+                          <tr key={mi}>
+                            <td className="text-[var(--text-soft)]">{mode.difficultyName}</td>
+                            <td className="right num">
+                              {mode.completedCount}/{mode.totalCount} · {mode.statusName}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 ))}
               </div>
@@ -471,24 +492,27 @@ function DetailsSections({ details }: { details: CharacterDetails }) {
 
       {details.dungeons && details.dungeons.expansions.length > 0 && (
         <Section title="Donjons">
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-5">
             {details.dungeons.expansions.map((exp, ei) => (
               <div key={ei}>
-                <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--ink-soft)]">
+                <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--text-soft)]">
                   {exp.name}
                 </p>
                 {exp.instances.map((inst, ii) => (
                   <div key={ii} className="mb-3">
-                    <p className="text-xs italic text-[var(--ink-mute)]">{inst.name}</p>
-                    {inst.modes.map((mode, mi) => (
-                      <div key={mi} className="ledger-row">
-                        <span className="lr-key text-[var(--ink-faded)]">{mode.difficultyName}</span>
-                        <span className="lr-leader" />
-                        <span className="num lr-val">
-                          {mode.completedCount}/{mode.totalCount} · {mode.statusName}
-                        </span>
-                      </div>
-                    ))}
+                    <p className="mb-1 text-xs muted">{inst.name}</p>
+                    <table className="tbl">
+                      <tbody>
+                        {inst.modes.map((mode, mi) => (
+                          <tr key={mi}>
+                            <td className="text-[var(--text-soft)]">{mode.difficultyName}</td>
+                            <td className="right num">
+                              {mode.completedCount}/{mode.totalCount} · {mode.statusName}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 ))}
               </div>
@@ -501,45 +525,58 @@ function DetailsSections({ details }: { details: CharacterDetails }) {
         <Section
           title="PvP"
           right={
-            <span className="num text-sm text-[var(--blood)]">
+            <span className="num text-sm text-[var(--gold-bright)]">
               {details.pvp.honorLevel} honneur · {details.pvp.honorableKills.toLocaleString("fr-FR")} kills
             </span>
           }
         >
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-5">
             {details.pvp.brackets.length > 0 && (
               <div>
-                <p className="mb-2 text-xs italic text-[var(--ink-mute)]">Brackets</p>
-                <ul className="grid grid-cols-1 gap-x-10 gap-y-1 sm:grid-cols-2">
-                  {details.pvp.brackets.map((b, i) => (
-                    <li key={i} className="ledger-row">
-                      <span className="lr-key uppercase">{b.bracket}</span>
-                      <span className="lr-leader" />
-                      <span className="lr-val">
-                        <span className="num text-[var(--blood)]">{b.rating}</span>
-                        <span className="ml-2 text-xs text-[var(--ink-mute)]">
-                          {b.seasonWon}–{b.seasonLost}
-                        </span>
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                <p className="mb-2 text-xs muted">Brackets</p>
+                <table className="tbl">
+                  <thead>
+                    <tr>
+                      <th>Bracket</th>
+                      <th>Rating</th>
+                      <th className="right">Saison</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {details.pvp.brackets.map((b, i) => (
+                      <tr key={i}>
+                        <td className="uppercase text-[var(--text)]">{b.bracket}</td>
+                        <td className="num text-[var(--gold-bright)]">{b.rating}</td>
+                        <td className="right muted">
+                          {b.seasonWon}–{b.seasonLost} ({b.seasonPlayed})
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
             {details.pvp.mapStatistics.length > 0 && (
               <div>
-                <p className="mb-2 text-xs italic text-[var(--ink-mute)]">Champs de bataille</p>
-                <ul className="flex flex-col gap-1">
-                  {details.pvp.mapStatistics.map((m, i) => (
-                    <li key={i} className="ledger-row">
-                      <span className="lr-key">{m.mapName}</span>
-                      <span className="lr-leader" />
-                      <span className="num lr-val text-[var(--ink-mute)]">
-                        {m.won}–{m.lost} ({m.played})
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                <p className="mb-2 text-xs muted">Champs de bataille</p>
+                <table className="tbl">
+                  <thead>
+                    <tr>
+                      <th>Carte</th>
+                      <th className="right">Bilan</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {details.pvp.mapStatistics.map((m, i) => (
+                      <tr key={i}>
+                        <td className="text-[var(--text-soft)]">{m.mapName}</td>
+                        <td className="right num muted">
+                          {m.won}–{m.lost} ({m.played})
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
           </div>
@@ -549,59 +586,67 @@ function DetailsSections({ details }: { details: CharacterDetails }) {
       {details.professions &&
         (details.professions.primaries.length > 0 || details.professions.secondaries.length > 0) && (
           <Section title="Professions">
-            <ul className="grid grid-cols-1 gap-x-10 gap-y-1 sm:grid-cols-2">
-              {[...details.professions.primaries, ...details.professions.secondaries].map((p, i) => (
-                <li key={i} className="ledger-row">
-                  <span className="lr-key">
-                    {p.name}
-                    {p.tiers.map((t, ti) => (
-                      <span key={ti} className="ml-1 text-xs text-[var(--ink-mute)]">
-                        · {t.tierName} {t.skillPoints}/{t.maxSkillPoints}
-                      </span>
-                    ))}
-                  </span>
-                  <span className="lr-leader" />
-                  <span className="num lr-val text-[var(--ink-mute)]">{p.tiers[0]?.recipeCount ?? 0} rec.</span>
-                </li>
-              ))}
-            </ul>
+            <table className="tbl">
+              <thead>
+                <tr>
+                  <th>Métier</th>
+                  <th>Niveau</th>
+                  <th className="right">Recettes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[...details.professions.primaries, ...details.professions.secondaries].map((p, i) => (
+                  <tr key={i}>
+                    <td className="text-[var(--text)]">{p.name}</td>
+                    <td className="muted">
+                      {p.tiers.map((t, ti) => (
+                        <span key={ti} className="mr-2">
+                          {t.tierName} {t.skillPoints}/{t.maxSkillPoints}
+                        </span>
+                      ))}
+                    </td>
+                    <td className="right num">{p.tiers[0]?.recipeCount ?? 0}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </Section>
         )}
 
       {details.reputations && details.reputations.length > 0 && (
         <Section title="Réputations">
-          <ul className="grid grid-cols-1 gap-x-10 gap-y-1 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-x-8 sm:grid-cols-2">
             {details.reputations
               .filter((r) => r.tier > 0)
               .slice(0, 30)
               .map((r, i) => (
-                <li key={i} className="ledger-row">
-                  <span className="lr-key truncate">{r.faction}</span>
-                  <span className="lr-leader" />
-                  <span className="num lr-val text-[var(--ink-mute)]">
+                <div key={i} className="stat-row">
+                  <span className="k truncate">{r.faction}</span>
+                  <span className="leader" />
+                  <span className="v num muted">
                     {r.standingName} ({r.value}/{r.max})
                   </span>
-                </li>
+                </div>
               ))}
-          </ul>
+          </div>
         </Section>
       )}
 
       {details.titles && details.titles.list.length > 0 && (
         <Section
           title="Titres"
-          right={<span className="num text-sm text-[var(--blood)]">{details.titles.list.length}</span>}
+          right={<span className="num text-sm text-[var(--gold-bright)]">{details.titles.list.length}</span>}
         >
           {details.titles.active && (
-            <p className="mb-3 text-sm italic text-[var(--blood)]">« {details.titles.active} » — porté actuellement</p>
+            <p className="mb-3 text-sm text-[var(--gold-bright)]">« {details.titles.active} » (actif)</p>
           )}
-          <ul className="grid grid-cols-1 gap-x-10 gap-y-1 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-x-8 sm:grid-cols-2">
             {details.titles.list.slice(0, 40).map((t, i) => (
-              <li key={i} className="ledger-row">
-                <span className="lr-key truncate text-[var(--ink-faded)]">{t}</span>
-              </li>
+              <div key={i} className="stat-row">
+                <span className="k truncate text-[var(--text-soft)]">{t}</span>
+              </div>
             ))}
-          </ul>
+          </div>
         </Section>
       )}
     </div>

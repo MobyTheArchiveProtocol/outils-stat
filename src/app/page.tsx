@@ -14,75 +14,66 @@ export default function Home() {
   const configured = isBlizzardConfigured();
 
   return (
-    <article className="manuscript ornament-corners gilt-frame">
-      <header className="text-center">
-        <p className="chap-label mb-4">⚔ Chroniques de data</p>
-        <h1 className="h-chronicle text-4xl uppercase sm:text-6xl">outils-stat</h1>
-        <hr className="gilt-rule mx-auto mt-5 w-2/3" />
-        <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed italic text-[var(--ink-soft)]">
-          Les statistiques de vos jeux, comme à l’époque. Proprement.
-        </p>
-      </header>
-
-      <section className="mt-10">
-        <p className="dropcap text-lg leading-relaxed text-[var(--ink)]">
-          Pas de publicité. Pas de tracking. Pas de distraction. Juste la data de votre compte et
-          de vos jeux, présentée clairement — comme on consignait jadis les hauts faits dans un
-          registre, à l’encre et au couteau. On commence par Blizzard.
-        </p>
-
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Link href="/stats/wow" className="seal-btn">
-            ⚔ Ouvrir les stats WoW
-          </Link>
-          <Link href="/a-propos" className="ghost-btn">
-            Le concept
-          </Link>
+    <div className="flex flex-col gap-8">
+      <section className="panel">
+        <div className="panel-head">
+          <span className="kicker">outils-stat</span>
+          <span className="kicker text-[var(--muted)]">sans pub · sans tracking</span>
         </div>
-
-        {!configured && (
-          <p className="mt-6 border-l-2 border-[var(--blood)] bg-[var(--parchment-2)]/60 px-4 py-3 text-sm text-[var(--ink-soft)]">
-            Le serveur n’a pas encore de credentials Blizzard. Renseignez{" "}
-            <code className="font-mono text-[var(--blood)]">BATTLE_NET_CLIENT_ID</code> et{" "}
-            <code className="font-mono text-[var(--blood)]">BATTLE_NET_CLIENT_SECRET</code> pour
-            activer la data.
+        <div className="px-6 py-8 sm:px-9">
+          <h1
+            className="text-3xl font-semibold uppercase leading-tight tracking-tight text-[var(--text)] sm:text-4xl"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            Les stats de vos jeux, comme à l’époque.
+          </h1>
+          <p className="mt-4 max-w-xl text-base leading-relaxed text-[var(--text-soft)]">
+            Pas de publicité. Pas de tracking. Pas de distraction. Juste la data de votre compte et
+            de vos jeux, présentée clairement. On commence par Blizzard.
           </p>
-        )}
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link href="/stats/wow" className="btn-gold">
+              Voir les stats WoW
+            </Link>
+            <Link href="/a-propos" className="btn-ghost">
+              Le concept
+            </Link>
+          </div>
+          {!configured && (
+            <p className="mt-6 border-l-2 border-[var(--warn)] bg-[var(--warn)]/10 px-4 py-3 text-sm text-[var(--text-soft)]">
+              Le serveur n’a pas encore de credentials Blizzard. Renseignez{" "}
+              <code className="font-mono text-[var(--gold-bright)]">BATTLE_NET_CLIENT_ID</code> et{" "}
+              <code className="font-mono text-[var(--gold-bright)]">BATTLE_NET_CLIENT_SECRET</code>{" "}
+              pour activer la data.
+            </p>
+          )}
+        </div>
       </section>
-
-      <div className="fleuron my-10">❦</div>
 
       <section>
-        <h2 className="chap-label mb-5">Sources consignées</h2>
-        <ul className="flex flex-col gap-3">
+        <h2 className="section-title mb-4 px-1">Sources disponibles</h2>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {games.map((g) => (
-            <li key={g.slug}>
-              <Link href={`/stats/${g.slug}`} className="group block">
-                <div className="ledger-row">
-                  <span className="lr-key text-lg text-[var(--ink)] group-hover:text-[var(--blood)]">
-                    {g.name}
-                  </span>
-                  <span className="lr-leader" />
-                  <span className="chap-label lr-val">⚔ disponible</span>
-                </div>
-                <p className="mt-1 pl-1 text-sm text-[var(--ink-faded)]">{g.blurb}</p>
-              </Link>
-            </li>
+            <Link key={g.slug} href={`/stats/${g.slug}`} className="panel block p-5 transition-colors hover:border-[var(--gold)]">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-medium text-[var(--text)]">{g.name}</h3>
+                <span className="kicker">dispo</span>
+              </div>
+              <p className="mt-2 text-sm text-[var(--text-soft)]">{g.blurb}</p>
+              <p className="mt-4 text-xs text-[var(--gold)]">ouvrir →</p>
+            </Link>
           ))}
-          <li>
-            <div className="ledger-row">
-              <span className="lr-key text-lg italic text-[var(--ink-faded)]">
-                Steam · Riot · et plus
-              </span>
-              <span className="lr-leader" />
-              <span className="chap-label lr-val text-[var(--ink-mute)]">à venir</span>
+          <div className="panel border-dashed p-5 opacity-80">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-medium muted">Steam · Riot · et plus</h3>
+              <span className="kicker text-[var(--muted)]">à venir</span>
             </div>
-            <p className="mt-1 pl-1 text-sm text-[var(--ink-mute)]">
+            <p className="mt-2 text-sm text-[var(--text-soft)]">
               D’autres sources arrivent dès qu’une API utile ou marrante est disponible.
             </p>
-          </li>
-        </ul>
+          </div>
+        </div>
       </section>
-    </article>
+    </div>
   );
 }

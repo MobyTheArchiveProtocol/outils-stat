@@ -46,30 +46,30 @@ export default function WowStatsClient({ initialRegion }: { initialRegion: Regio
   };
 
   return (
-    <article className="manuscript ornament-corners gilt-frame">
-      <header className="flex flex-col gap-3 border-b border-dotted border-[var(--ink-mute)] pb-6 sm:flex-row sm:items-end sm:justify-between">
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="chap-label">⚔ Chapitre I</p>
-          <h1 className="h-chronicle mt-2 text-3xl uppercase sm:text-4xl">Royaumes connectés</h1>
-          <p className="mt-1 text-sm italic text-[var(--ink-faded)]">
-            Statut des royaumes World of Warcraft · source Battle.net API
-          </p>
+          <span className="kicker">World of Warcraft</span>
+          <h1 className="mt-2 text-2xl font-semibold uppercase tracking-tight text-[var(--text)] sm:text-3xl">
+            Royaumes connectés
+          </h1>
+          <p className="mt-1 text-sm muted">Statut des royaumes · source Battle.net API</p>
           <Link
             href="/stats/wow/character"
-            className="mt-3 inline-block text-sm text-[var(--blood)] underline decoration-dotted underline-offset-4 hover:text-[var(--blood-bright)]"
+            className="mt-2 inline-block text-sm text-[var(--gold)] hover:text-[var(--gold-bright)]"
           >
-            Consulter un personnage →
+            rechercher un personnage →
           </Link>
         </div>
         <div className="flex items-center gap-2">
-          <label htmlFor="region" className="ledger-label">
+          <label htmlFor="region" className="kicker">
             région
           </label>
           <select
             id="region"
             value={region}
             onChange={(e) => setRegion(e.target.value as Region)}
-            className="ink-field"
+            className="field"
           >
             {REGIONS.map((r) => (
               <option key={r} value={r}>
@@ -77,26 +77,24 @@ export default function WowStatsClient({ initialRegion }: { initialRegion: Regio
               </option>
             ))}
           </select>
-          <button type="button" onClick={handleRefresh} className="ghost-btn h-10 px-3 text-xs">
+          <button type="button" onClick={handleRefresh} className="btn-ghost h-10 px-3 text-xs">
             rafraîchir
           </button>
         </div>
-      </header>
-
-      <div className="mt-6">
-        {state.status === "loading" && <LoadingState />}
-        {state.status === "error" && <ErrorState message={state.message} />}
-        {state.status === "success" && <StatsView data={state.data} />}
       </div>
-    </article>
+
+      {state.status === "loading" && <LoadingState />}
+      {state.status === "error" && <ErrorState message={state.message} />}
+      {state.status === "success" && <StatsView data={state.data} />}
+    </div>
   );
 }
 
 function LoadingState() {
   return (
-    <div className="flex flex-col gap-3">
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="h-10 animate-pulse bg-[var(--parchment-2)]/60" />
+        <div key={i} className="h-24 animate-pulse panel" />
       ))}
     </div>
   );
@@ -104,10 +102,10 @@ function LoadingState() {
 
 function ErrorState({ message }: { message: string }) {
   return (
-    <div className="border-l-2 border-[var(--blood)] bg-[var(--parchment-2)]/60 px-4 py-3">
-      <p className="text-sm text-[var(--blood)]">Impossible de charger les stats.</p>
-      <p className="mt-2 text-sm text-[var(--ink-faded)]">{message}</p>
-      <p className="mt-2 text-xs text-[var(--ink-mute)]">
+    <div className="panel border-l-2 border-l-[var(--danger)] p-5">
+      <p className="text-sm text-[var(--danger)]">Impossible de charger les stats.</p>
+      <p className="mt-2 text-sm text-[var(--text-soft)]">{message}</p>
+      <p className="mt-3 text-xs muted">
         Vérifiez que les credentials Blizzard sont configurés côté serveur.
       </p>
     </div>
@@ -127,6 +125,16 @@ const POP_LABELS: Record<string, string> = {
   LOWEST: "Très faible",
 };
 
+function StatCard({ label, value, hint }: { label: string; value: string | number; hint?: string }) {
+  return (
+    <div className="panel p-4">
+      <p className="kicker">{label}</p>
+      <p className="num mt-2 text-2xl text-[var(--text)]">{value}</p>
+      {hint && <p className="mt-1 text-xs muted">{hint}</p>}
+    </div>
+  );
+}
+
 function StatsView({ data }: { data: RegionStat }) {
   const statusEntries = Object.entries(data.byStatus).sort((a, b) => b[1] - a[1]);
   const popEntries = Object.entries(data.byPopulation).sort((a, b) => b[1] - a[1]);
@@ -134,101 +142,97 @@ function StatsView({ data }: { data: RegionStat }) {
   const maxPop = Math.max(...popEntries.map(([, v]) => v), 1);
 
   return (
-    <div className="flex flex-col gap-10">
-      <section>
-        <h2 className="ledger-label mb-3">État de la région {data.region.toUpperCase()}</h2>
-        <div className="grid grid-cols-1 gap-x-10 gap-y-1 sm:grid-cols-2">
-          <div className="ledger-row">
-            <span className="lr-key">Royaumes dénombrés</span>
-            <span className="lr-leader" />
-            <span className="num lr-val">{data.total}</span>
+    <div className="flex flex-col gap-6">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <StatCard label="Royaumes" value={data.total} hint={`région ${data.region.toUpperCase()}`} />
+        <StatCard label="En ligne" value={data.online} />
+        <StatCard label="Avec file" value={data.queued} />
+        <StatCard
+          label="Disponibilité"
+          value={data.total > 0 ? `${Math.round((data.online / data.total) * 100)}%` : "—"}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="panel">
+          <div className="panel-head">
+            <h2 className="section-title">Par statut</h2>
           </div>
-          <div className="ledger-row">
-            <span className="lr-key">En ligne</span>
-            <span className="lr-leader" />
-            <span className="num lr-val text-[var(--rune)]">{data.online}</span>
-          </div>
-          <div className="ledger-row">
-            <span className="lr-key">Avec file d’attente</span>
-            <span className="lr-leader" />
-            <span className="num lr-val">{data.queued}</span>
-          </div>
-          <div className="ledger-row">
-            <span className="lr-key">Disponibilité</span>
-            <span className="lr-leader" />
-            <span className="num lr-val">
-              {data.total > 0 ? `${Math.round((data.online / data.total) * 100)}%` : "—"}
-            </span>
+          <div className="p-4">
+            <ul className="flex flex-col gap-3">
+              {statusEntries.map(([key, value]) => (
+                <li key={key}>
+                  <div className="mb-1.5 flex items-center justify-between text-sm">
+                    <span className="text-[var(--text-soft)]">{STATUS_LABELS[key] ?? key}</span>
+                    <span className="num text-[var(--muted)]">{value}</span>
+                  </div>
+                  <div className="bar-track">
+                    <div className="bar-fill" style={{ width: `${(value / maxStatus) * 100}%` }} />
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
-      </section>
 
-      <section>
-        <h2 className="ledger-label mb-3">Par statut</h2>
-        <ul className="flex flex-col gap-3">
-          {statusEntries.map(([key, value]) => (
-            <li key={key}>
-              <div className="ledger-row">
-                <span className="lr-key">{STATUS_LABELS[key] ?? key}</span>
-                <span className="lr-leader" />
-                <span className="num lr-val">{value}</span>
-              </div>
-              <div className="ledger-bar-track mt-1.5">
-                <div
-                  className="ledger-bar-fill"
-                  style={{ width: `${(value / maxStatus) * 100}%` }}
-                />
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
+        <div className="panel">
+          <div className="panel-head">
+            <h2 className="section-title">Par population</h2>
+          </div>
+          <div className="p-4">
+            <ul className="flex flex-col gap-3">
+              {popEntries.map(([key, value]) => (
+                <li key={key}>
+                  <div className="mb-1.5 flex items-center justify-between text-sm">
+                    <span className="text-[var(--text-soft)]">{POP_LABELS[key] ?? key}</span>
+                    <span className="num text-[var(--muted)]">{value}</span>
+                  </div>
+                  <div className="bar-track">
+                    <div className="bar-fill" style={{ width: `${(value / maxPop) * 100}%` }} />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
 
-      <section>
-        <h2 className="ledger-label mb-3">Par population</h2>
-        <ul className="flex flex-col gap-3">
-          {popEntries.map(([key, value]) => (
-            <li key={key}>
-              <div className="ledger-row">
-                <span className="lr-key">{POP_LABELS[key] ?? key}</span>
-                <span className="lr-leader" />
-                <span className="num lr-val">{value}</span>
-              </div>
-              <div className="ledger-bar-track mt-1.5">
-                <div
-                  className="ledger-bar-fill"
-                  style={{ width: `${(value / maxPop) * 100}%` }}
-                />
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section>
-        <h2 className="ledger-label mb-3">Royaumes d’attention</h2>
-        {data.topRealms.length === 0 ? (
-          <p className="text-sm italic text-[var(--ink-mute)]">Aucun royaume à signaler.</p>
-        ) : (
-          <ul className="flex flex-col gap-1">
-            {data.topRealms.map((r) => (
-              <li key={r.slug} className="ledger-row">
-                <span className="lr-key">
-                  {r.name}{" "}
-                  <span className="text-xs text-[var(--ink-mute)]">· {POP_LABELS[r.population] ?? r.population}</span>
-                </span>
-                <span className="lr-leader" />
-                <span className={`lr-val ${r.status === "UP" ? "text-[var(--rune)]" : "text-[var(--blood)]"}`}>
-                  {STATUS_LABELS[r.status] ?? r.status}
-                  {r.hasQueue && (
-                    <span className="ml-2 text-xs text-[var(--blood-bright)]">file</span>
-                  )}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <div className="panel">
+        <div className="panel-head">
+          <h2 className="section-title">Royaumes d’attention</h2>
+        </div>
+        <div className="p-0">
+          {data.topRealms.length === 0 ? (
+            <p className="p-4 text-sm muted">Aucun royaume à signaler.</p>
+          ) : (
+            <table className="tbl">
+              <thead>
+                <tr>
+                  <th>Royaume</th>
+                  <th>Population</th>
+                  <th className="right">Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.topRealms.map((r) => (
+                  <tr key={r.slug}>
+                    <td className="text-[var(--text)]">{r.name}</td>
+                    <td className="muted">{POP_LABELS[r.population] ?? r.population}</td>
+                    <td className="right">
+                      <span className={r.status === "UP" ? "text-[var(--rune)]" : "text-[var(--danger)]"}>
+                        {STATUS_LABELS[r.status] ?? r.status}
+                      </span>
+                      {r.hasQueue && (
+                        <span className="ml-2 text-xs text-[var(--warn)]">file</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

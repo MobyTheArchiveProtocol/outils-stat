@@ -17,16 +17,19 @@ export default async function AccountWidget() {
 
   if (session) {
     return (
-      <span className="wax">
-        <span className="text-[var(--gold-leaf)]/70">Battle.net · {session.region.toUpperCase()}</span>
+      <span className="flex items-center gap-2 text-xs">
+        <span className="muted">Battle.net · {session.region.toUpperCase()}</span>
         <LogoutButton />
       </span>
     );
   }
 
   return (
-    <Link href="/api/auth/login" className="wax-link">
-      Sceau Battle.net
+    <Link
+      href="/api/auth/login"
+      className="text-xs text-[var(--gold)] transition-colors hover:text-[var(--gold-bright)]"
+    >
+      Se connecter (Battle.net)
     </Link>
   );
 }

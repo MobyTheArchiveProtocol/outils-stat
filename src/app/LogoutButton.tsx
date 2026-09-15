@@ -11,7 +11,7 @@ export default function LogoutButton() {
         await fetch("/api/auth/callback", { method: "DELETE" });
         router.refresh();
       }}
-      className="wax-link"
+      className="text-[var(--text-soft)] transition-colors hover:text-[var(--gold-bright)]"
     >
       Déconnexion
     </button>
