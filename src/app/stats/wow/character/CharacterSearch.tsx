@@ -189,14 +189,36 @@ function ProfileView({
 }) {
   const cColor = classColor(data.className);
   const fColor = data.factionName ? factionColor(data.factionName) : undefined;
+  const heroImg = data.renderUrl ?? data.bustUrl ?? null;
+  const portraitImg = data.avatarUrl ?? data.bustUrl ?? null;
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="panel">
+      <div className="panel overflow-hidden">
+        {heroImg && (
+          <div className="hero-render relative h-56 w-full sm:h-72">
+            <Image
+              src={heroImg}
+              alt={`${data.name} — rendu`}
+              fill
+              sizes="(max-width: 640px) 100vw, 1024px"
+              className="object-contain object-top"
+              unoptimized
+              priority
+            />
+          </div>
+        )}
         <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center">
-          {data.avatarUrl && (
-            <div className="relative h-24 w-24 shrink-0 overflow-hidden border border-[var(--gold-line)] bg-black/40">
-              <Image src={data.avatarUrl} alt={data.name} fill sizes="96px" className="object-cover" unoptimized />
+          {portraitImg && (
+            <div className="portrait relative h-20 w-20 shrink-0 bg-black/50">
+              <Image
+                src={portraitImg}
+                alt={data.name}
+                fill
+                sizes="80px"
+                className="object-cover"
+                unoptimized
+              />
             </div>
           )}
           <div className="flex flex-col gap-1">

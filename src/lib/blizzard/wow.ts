@@ -156,6 +156,7 @@ export async function getCharacterProfile(
     guildName: summary.guild ? pickLocal(summary.guild.name, "") : null,
     isValid: status ? status.is_valid : true,
     avatarUrl: media?.avatar_url ?? null,
+    bustUrl: media?.bust_url ?? null,
     renderUrl: media?.render_url ?? null,
     equipment: equipment
       ? (equipment.equipped_items ?? []).map((e) => ({

@@ -93,8 +93,11 @@ html {
 body {
   background-color: var(--bg);
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(200, 160, 74, 0.06), transparent 60%);
+    url("/bg-tile.svg"),
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(200, 160, 74, 0.08), transparent 60%),
+    radial-gradient(ellipse 70% 50% at 50% 110%, rgba(110, 31, 23, 0.06), transparent 60%);
   background-attachment: fixed;
+  background-repeat: repeat, no-repeat, no-repeat;
   color: var(--text);
   font-family: var(--font-body), Georgia, "Times New Roman", serif;
   -webkit-font-smoothing: antialiased;
@@ -294,6 +297,42 @@ body {
 .bar-fill {
   height: 100%;
   background-image: linear-gradient(90deg, var(--gold-deep), var(--gold-bright));
+}
+
+/* ── Hero / character render ────────────────────────────────────── */
+
+.hero-render {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 70% 90% at 50% 30%, rgba(200, 160, 74, 0.10), transparent 70%),
+    linear-gradient(180deg, var(--panel-2), var(--panel));
+  border: 1px solid var(--gold-line);
+}
+.hero-render::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(180deg, transparent 60%, var(--panel));
+}
+
+.portrait {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--gold-line);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.5);
+}
+
+.ornament {
+  display: inline-block;
+  width: 64px;
+  height: 20px;
+  background-image: url("/ornament.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0.6;
 }
 
 /* ── Misc ───────────────────────────────────────────────────────── */

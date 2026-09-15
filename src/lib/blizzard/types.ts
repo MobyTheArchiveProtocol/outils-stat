@@ -134,6 +134,7 @@ export type CharacterProfile = {
   guildName: string | null;
   isValid: boolean;
   avatarUrl: string | null;
+  bustUrl: string | null;
   renderUrl: string | null;
   equipment: {
     slot: string;

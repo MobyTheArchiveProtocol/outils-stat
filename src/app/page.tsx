@@ -7,6 +7,7 @@ const games = [
     slug: "wow",
     name: "World of Warcraft",
     blurb: "Statut des royaumes connectés, files d’attente, population — par région.",
+    emblem: "/emblem-wow.svg",
   },
 ];
 
@@ -27,6 +28,7 @@ export default function Home() {
           >
             Les stats de vos jeux, comme à l’époque.
           </h1>
+          <span className="ornament mt-3" aria-hidden />
           <p className="mt-4 max-w-xl text-base leading-relaxed text-[var(--text-soft)]">
             Pas de publicité. Pas de tracking. Pas de distraction. Juste la data de votre compte et
             de vos jeux, présentée clairement. On commence par Blizzard.
@@ -54,13 +56,20 @@ export default function Home() {
         <h2 className="section-title mb-4 px-1">Sources disponibles</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {games.map((g) => (
-            <Link key={g.slug} href={`/stats/${g.slug}`} className="panel block p-5 transition-colors hover:border-[var(--gold)]">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-medium text-[var(--text)]">{g.name}</h3>
-                <span className="kicker">dispo</span>
+            <Link key={g.slug} href={`/stats/${g.slug}`} className="panel block overflow-hidden transition-colors hover:border-[var(--gold)]">
+              <div
+                className="relative h-28 w-full bg-cover bg-center"
+                style={{ backgroundImage: `url("${g.emblem}")`, backgroundColor: "var(--panel-2)" }}
+                aria-hidden
+              />
+              <div className="p-5">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-medium text-[var(--text)]">{g.name}</h3>
+                  <span className="kicker">dispo</span>
+                </div>
+                <p className="mt-2 text-sm text-[var(--text-soft)]">{g.blurb}</p>
+                <p className="mt-4 text-xs text-[var(--gold)]">ouvrir →</p>
               </div>
-              <p className="mt-2 text-sm text-[var(--text-soft)]">{g.blurb}</p>
-              <p className="mt-4 text-xs text-[var(--gold)]">ouvrir →</p>
             </Link>
           ))}
           <div className="panel border-dashed p-5 opacity-80">
